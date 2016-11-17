@@ -19,9 +19,11 @@ res1=disc_fun("Male",S)
 res2=disc_fun("Female",S)
 # MISSING: use these to derive  decision boundary coefficients 'res'
 
-
+# b b a 
 # classification
 d=res[1]*X[,1]+res[2]*X[,2]+res[3]
+
+
 Yfit=(d>0)
 plot(X[,1], X[,2], col=Yfit+1, xlab="CL", ylab="RW")
 

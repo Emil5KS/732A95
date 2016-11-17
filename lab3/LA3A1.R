@@ -6,9 +6,8 @@
 
 # 1.1 
 
-setwd("/Users/EmilsHem/Documents/732A95/lab3")
-crabs <- read.csv("australian-crabs.csv")
-
+crabs <- read.csv("lab3/australian-crabs.csv")
+library(ggplot2)
 p<- ggplot(data = crabs) + geom_point(aes(x = RW, y =CL, col = sex))
 plot(p)
 
@@ -34,18 +33,87 @@ wF<- solve(mySig) %*% t(myMu[1,2:3])
 #wFM<-sapply(1:2, FUN = function(x) solve(mySig) %*% t(myMu[x,2:3]))
 #t(cbind(RW,CL)) %*% mySig %*% myMy[2,2:3] -  
 
+a <- (woMale - woFem) 
+b <- wM - wF
+x <- cbind(RW,CL)
 
-ldaF<-cbind(RW,CL) %*% as.matrix(wF) %*% as.matrix(woFem)
-ldaM<-cbind(RW,CL) %*% as.matrix(wM) %*% as.matrix(woMale)
+
+#w0s<- a 
+#w1s <- b[1]
+#w2s <- b[2]
+myInter <- as.numeric(-a/b[2]) 
+
+mySlope <- as.numeric(-b[1]/b[2])
+
+p + geom_abline(intercept = myInter, slope = mySlope)
+
+my
 
 
-theAns <- lda(sex ~ RW + CL, data = crabs)
-predict(theAns)
+woMale
+woFem 
+
+b[1,] %*% x[,1] + b[2,]*x[,2]+a[1]
+
+
+ifelse((a[1] + t(b) %*% t(x)) > 0 ,1,0)
+
+
+
 
 ############ Skit nedan
 #
 #
 #
+
+
+
+p + geom_abline(intercept = a[1], slope = wM[1,1]) 
+
+p + geom_abline(intercept = 0.645, slope = 2.470) 
++ geom_abline(intercept = a[1], slope = b[,2],col = "red") 
+
+lm(CL~RW,data = crabs)
+
+
+#wo = a 
+#wi = b 
+# a1-a2(b1-b2)x
+
+#slope<-data.frame(matrix(,ncol = 1))
+plot( (a[1] + (t(b) %*% t(x))),(a[1] + (t(b) %*% t(x))) )
+
+p + geom_line(aes(x= slope,y = slope))
+  
+  geom_abline(intercept = a[1], slope = )  
+
+(t(b) %*% t(x) ~ t(b) %*% t(x)) 
+
+solve(mySig) %*% b 
+
+
+
+
+Males<-as.matrix(subset(crabs,sex == "Male",c(RW,CL)))
+
+ldaF<-cbind(RW,CL) %*% as.matrix(wF) %*% as.matrix(woFem)
+ldaM<-cbind(RW,CL) %*% as.matrix(wM) %*% as.matrix(woMale)
+
+solve(mySig) %*% t(myMu[1,2:3] - myMu[2,2:3])
+
+as.matrix(wM) %*% as.matrix(woMale)  
+as.matrix(wF) %*% as.matrix(woFem)
+
+
+library(MASS)
+theAns <- lda(sex ~ RW + CL, data = crabs)
+table(ifelse(predict(theAns)$x > 0, 1,0))
+table(ifelse(ldaM > 0, 1,0))
+
+
+
+p + geom_abline(intercept = 18.03, slope = 5)
+
 
  (wF%*%woFem) - wM%*%woMale 
 (ldaF > ldaM)
