@@ -1,0 +1,21 @@
+aggregate(plotdata,list(plotdata$nofeats),FUN = min)[,c(3,4)]
+
+ggplot()+geom_line(data = aggregate(plotdata,list(plotdata$nofeats),FUN = min)[,c(3,4)],aes(x=nofeats,y=CV)) + geom_point(data = plotdata,aes(x=nofeats,y=CV,col = factor(nofeats)) ) +
++    labs(title = "CV scores for different no. feats",color = "No. feat")
+
+
+
+
+ engr<-ggplot(data = plotdata,aes(x=nofeats,y=CV,col = factor(nofeats)) ) + geom_point() +
+   labs(title = "CV scores for different no. feats",color = "No. feat") +
+   scale_fill_manual(values=rainbow(4))
+   
+   
+   
+    # Create a list with all the K data frames
+ #WILL PROBABLY BE NEEDED LATER SO DONT DELETE IT DIPSHIT
+ dataFrejm<-list()
+ for (i in 1:K){
+  dataFrejm[[i]] <- myData[which(myData$index == i),] #-length(data) add if dont want index
+ }
+   
