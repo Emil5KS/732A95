@@ -60,7 +60,56 @@ sum(diag(giniTabT))/nrow(csTest)
 
 
 
+valid23 <- data.frame(trainS=1,testS = 1)
+tDev2 <- tree(good_bad~ ., data = csTrain, split = "deviance")
+rad <- 1 
+  for (i in 2:15) {  
+    tDev22         <-      prune.tree(tDev2, best = i)
+    valid23[rad,1]<-      deviance(tDev22)
+    valid23[rad,2]<-      deviance(predict(tDev22,newdata = csValid,type = "tree"))
+    rad <- rad + 1 
+}
 
+valid23$best <- 2:15
+ggplot(data = valid23,aes(x=best)) + geom_line(aes(y=trainS),col="red") + geom_line(aes(y=testS),col = "blue")
+
+## Borde vara best = 4 som är bäst? 
+tBest<-prune.tree(tDev2, best = 4)
+summary(tBest)
+plot(tBest)
+
+predBest<-predict(tBest,newdata = csTrain) 
+tTable<-table(predicted = ifelse(predBest[,1] > predBest[,2], "bad","good"), Train= csTrain$good_bad)
+sum(diag(tTable))/nrow(csTrain)
+
+predBT<-predict(tBest,newdata = csTest) 
+tBTable<-table(predicted = ifelse(predBT[,1] > predBT[,2], "bad","good"), Test= csTest$good_bad)
+sum(diag(tBTable))/nrow(csTest)
+
+
+## 2.4
+
+install.packages("e1071")
+library(e1071)
+??e1071
+
+baybay<- naiveBayes(formula = good_bad~., data=csTrain)
+bBay<- table(Predicted = predict(baybay,newdata = csTrain), Observed = csTrain$good_bad)
+sum(diag(bBay)) / nrow(csTrain)
+
+bBayTest<- table(Predicted = predict(baybay,newdata = csTest), Observed = csTest$good_bad)
+sum(diag(bBayTest)) / nrow(csTest)
+
+## 2.5
+rawprobs<-predict(baybay,csTrain,type = "raw")
+
+rawBayes<- rawprobs[,2]/rawprobs[,1] #good/bad
+
+lossMat<-matrix(c(0,10,1,0),ncol=2)
+
+bBay
+table(Predicted=ifelse(rawBayes > lossMat[2,1]/lossMat[1,2],"Good","Bad" ),Observed=csTrain$good_bad)
+#table(Predicted=ifelse(rawBayes > lossMat[1,2]/lossMat[2,1],"Good","Bad" ),Observed=csTrain$good_bad)
 
 
 
