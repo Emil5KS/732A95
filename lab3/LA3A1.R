@@ -56,7 +56,7 @@ return(retObj)
 }
 
 results <- LDA(crabs[,c(5,6,2)])
-
+results$myModel
 ## 2.3
 #actualdata + desicion boundaries
 #p + geom_abline(intercept = results$myModel[1], slope = results$myModel[2], col = "Red")
