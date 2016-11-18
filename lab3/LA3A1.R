@@ -10,12 +10,14 @@ crabs <- read.csv("lab3/australian-crabs.csv")
 library(ggplot2)
 p<- ggplot(data = crabs) + geom_point(aes(x = RW, y =CL, col = sex))
 plot(p)
-
+attach(crabs)
 # 1.2 
 
-LDA<- function(){}
-attach(crabs)
+LDA<- function(X){
 
+RW <- X[,1]
+CL <- X[,2]
+sex<- X[,3]
 myMu <- aggregate(cbind(RW,CL),by = list(sex), FUN = mean, simplify = TRUE)
 myCov <- by(cbind(RW,CL), list(sex), cov, method = "pearson")
 myPi <- aggregate(cbind(RW,CL),by = list(sex), FUN =function(x) length(x)/nrow(cbind(RW,CL)), simplify = TRUE)
@@ -35,17 +37,56 @@ wF<- solve(mySig) %*% t(myMu[1,2:3])
 
 a <- (woMale - woFem) 
 b <- wM - wF
-x <- cbind(RW,CL)
-
+#x <- cbind(RW,CL)
 
 #w0s<- a 
 #w1s <- b[1]
 #w2s <- b[2]
 myInter <- as.numeric(-a/b[2]) 
-
 mySlope <- as.numeric(-b[1]/b[2])
 
-p + geom_abline(intercept = myInter, slope = mySlope)
+X$myClass<-t(ifelse((a[1] + t(b) %*% t(x)) > 0 ,levels(X[,3])[2],levels(X[,3])[1]))
+colnames(X)[4] <- "Predicted" 
+retObj<-list(w0 = c(woMale,woFem),
+             w1 = cbind(wM=wM,wF=wF), 
+             myClass = X,
+             myModel = c(myInter = myInter, mySlope = mySlope))
+
+return(retObj)
+}
+
+results <- LDA(crabs[,c(5,6,2)])
+
+## 2.3
+#actualdata + desicion boundaries
+#p + geom_abline(intercept = results$myModel[1], slope = results$myModel[2], col = "Red")
+
+#predicted classes + desicion boundaries
+ggplot(data = results$myClass) + geom_point(aes(x = RW, y =CL, col = Predicted)) +
+  geom_abline(intercept = results$myModel[1], slope = results$myModel[2], col = "Red") +
+  labs(title = "Predicted values for my own LDA() function")
+
+## 1.4
+
+
+myLogit<-glm(sex~RW + CL, family = binomial(link='logit') )
+summary(myLogit)
+plot(myLogit)
+myDecLog<-coef(myLogit)[1:2]/-coef(myLogit)[3]
+
+ggplot(data = results$myClass) + geom_point(aes(x = RW, y =CL, col = ifelse(myLogit$fitted.values > 0.5,1,0))) +
+  geom_abline(intercept = myDecLog[1], slope = myDecLog[2])
+  
+
+table(ifelse(myLogit$fitted.values > 0.5,"Male","Female"),sex)
+
+
+round(predict(myLogit),digits = 4)
+
+############ Skit nedan
+#
+#
+#
 
 my
 
@@ -54,17 +95,6 @@ woMale
 woFem 
 
 b[1,] %*% x[,1] + b[2,]*x[,2]+a[1]
-
-
-ifelse((a[1] + t(b) %*% t(x)) > 0 ,1,0)
-
-
-
-
-############ Skit nedan
-#
-#
-#
 
 
 
@@ -121,11 +151,6 @@ p + geom_abline(intercept = 18.03, slope = 5)
 
 
 lda(ldaF[,1] ~ldaM[,1])
-
-
-
-
-
 
 
 length(ldaM > ldaF) 
