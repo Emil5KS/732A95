@@ -37,7 +37,7 @@ wF<- solve(mySig) %*% t(myMu[1,2:3])
 
 a <- (woMale - woFem) 
 b <- wM - wF
-#x <- cbind(RW,CL)
+x <- cbind(X[,1:2])
 
 #w0s<- a 
 #w1s <- b[1]
@@ -75,7 +75,8 @@ plot(myLogit)
 myDecLog<-coef(myLogit)[1:2]/-coef(myLogit)[3]
 
 ggplot(data = results$myClass) + geom_point(aes(x = RW, y =CL, col = ifelse(myLogit$fitted.values > 0.5,1,0))) +
-  geom_abline(intercept = myDecLog[1], slope = myDecLog[2])
+  geom_abline(intercept = myDecLog[1], slope = myDecLog[2]) 
++geom_contour(aes(density = mySig))
   
 
 table(ifelse(myLogit$fitted.values > 0.5,"Male","Female"),sex)
@@ -83,7 +84,13 @@ table(ifelse(myLogit$fitted.values > 0.5,"Male","Female"),sex)
 
 round(predict(myLogit),digits = 4)
 
-############ Skit nedan
+############
+
+
+
+
+
+###############################################################Skit nedan
 #
 #
 #
