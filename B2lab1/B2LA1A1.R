@@ -5,7 +5,7 @@
 
 
 setwd("/Users/EmilsHem/Documents/732A95/B2lab1")
-cube<-read.csv2("cube.csv")
+cube<-read.csv2("B2lab1/cube.csv")
 
 # Assignment 1 
 
@@ -55,9 +55,6 @@ colnames(SSpline) <- c("Y","X","Predictions")
 ggplot(data = SSpline) + geom_point(aes(x = X, y = Y)) + geom_line(aes(x = X, y = Predictions),color = "red")
 
 #Hur specificerar man specifika knots.
-
-# Assignment 2
-
 
 
 

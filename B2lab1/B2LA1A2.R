@@ -8,18 +8,17 @@
 
 Infu<-read.csv2("Influenza.csv")
 attach(Infu)
+library(gridExtra)
 
 p<- ggplot(data = Infu, aes(x = Time)) 
 aM<- p + geom_line(aes(y = Mortality)) 
 aI<- p + geom_line(aes(y = Influenza))
 #p + geom_line(aes(y = Mortality)) + geom_line(aes(y = Influenza))
-library(gridExtra)
 plot(arrangeGrob(aM,aI))
 
 
 ## 2.2
 library(mgcv)
-
 addM <- gam(Mortality ~ Year + s(Week),data = Infu )
 
 # E(mort|x) = N(Year,sigma) + spline-antaganden(week)
@@ -34,14 +33,26 @@ addM$smooth
 ## 2.4 
 
 
-for (spval in c(-100,1,50,10000)){ 
- #foraddM<-gam(Mortality ~ Year + s(Week),data = Infu, sp = spval)
+for (spval in c(-100,1,50,10000)){
   plot(aM + geom_line(aes(y = fitted(gam(Mortality ~ Year + s(Week, sp = spval),data = Infu))),col = "red") +
    labs(title = paste("Fits when lambda is:",spval) ))
- i <- i + 1  
 }
 
-
+# plotlist <- list()
+# i <- 1 
+# for (spval in c(-100,1,50,10000)){
+#   #foraddM<-gam(Mortality ~ Year + s(Week),data = Infu, sp = spval)
+#   plotlist[[i]] <- ggplot(data = Infu, aes(x = Time)) +
+#     geom_line(aes(y = Mortality)) + 
+#     geom_line(aes(y = fitted(gam(Mortality ~ Year + 
+#                                    s(Week, sp = spval),data = Infu))),col = "red") +
+#          labs(title = paste("Fits when lambda is:",spval) )
+#   i <- i + 1
+# }
+# 
+# library(gridExtra)
+# arrangeGrob(plotlist)
+# plot(plotlist)
 
 
 ## 2.5 
