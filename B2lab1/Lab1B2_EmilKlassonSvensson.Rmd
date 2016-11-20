@@ -2,7 +2,9 @@
 title: "Lab1B2_EmilKlassonSvensson"
 author: "Emil K Svensson"
 date: "19 November 2016"
-output: pdf_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
