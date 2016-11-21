@@ -6,7 +6,7 @@
 
 ## 2.1 
 
-Infu<-read.csv2("Influenza.csv")
+Infu<-read.csv2("B2lab1/Influenza.csv")
 attach(Infu)
 library(gridExtra)
 
@@ -39,21 +39,21 @@ for (spval in c(-100,1,50,10000)){
 }
 
 # plotlist <- list()
-# i <- 1 
+# i <- 1
 # for (spval in c(-100,1,50,10000)){
 #   #foraddM<-gam(Mortality ~ Year + s(Week),data = Infu, sp = spval)
 #   plotlist[[i]] <- ggplot(data = Infu, aes(x = Time)) +
-#     geom_line(aes(y = Mortality)) + 
-#     geom_line(aes(y = fitted(gam(Mortality ~ Year + 
+#     geom_line(aes(y = Mortality)) +
+#     geom_line(aes(y = fitted(gam(Mortality ~ Year +
 #                                    s(Week, sp = spval),data = Infu))),col = "red") +
 #          labs(title = paste("Fits when lambda is:",spval) )
 #   i <- i + 1
 # }
 # 
 # library(gridExtra)
-# arrangeGrob(plotlist)
+# grid.arrange(plotlist,ncol =2)
 # plot(plotlist)
-
+# do.call(grid.arrange, c(plotlist, list(ncol =2) ))
 
 ## 2.5 
 

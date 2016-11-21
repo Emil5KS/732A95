@@ -3,7 +3,6 @@ title: "Lab1B2_EmilKlassonSvensson"
 author: "Emil K Svensson"
 date: "19 November 2016"
 output:
-  html_document: default
   pdf_document: default
 ---
 
@@ -54,6 +53,10 @@ $H_2 = X$
 $H_3:length(knots) h3(X) = (X - \xi_i)$
 
 
+\newpage
+
+
+
 ## 1.2 Using myspline
 
 ```{r pressure, echo=FALSE}
@@ -69,6 +72,9 @@ summary(a)
 
 On a 5 % significance level all coefficients are significant and all separate coefficients are relevant to explaining Y. The Adjusted R-squared was calculated to 79.5 % and this along with the rest of the meassures this indicates that this is a good model for predicting Y. 
 
+\newpage
+
+
 ## 1.3 Using smooth.spline()
 
 ```{r}
@@ -81,6 +87,9 @@ ggplot(data = SSpline) + geom_point(aes(x = X, y = Y)) + geom_line(aes(x = X, y 
 
 ```
 Compared to the plot in section 1.2 this spline have a similar pattern as the linear spline but us a bit wiggly and fits the data in this example better because it doesn't miss that many predictions for values around x-values around 5. In this case i would choose this model over the linear spline although I risking overfitting. This because of the linear spline the poorly choosen knot at x = 4 for the linear spline which should be around x = 5 instead.
+
+\newpage
+
 
 # Assignment 2
 
@@ -102,19 +111,26 @@ plot(arrangeGrob(aM,aI))
 
 The Mortality-rate and the number of comfirmed Influenza cases seem to have some kind of correlation although the size of the Influenza spikes doesn't explain the size of the Mortality in a good manner. 
 
+\newpage
+
+
 ## 2.2 
 
 ```{r}
 library(mgcv)
-addM <- gam(Mortality ~ Year + s(Week),data = Infu )
+addM <- gam(Mortality ~ Year + s(Week, k = 51),data = Infu )
 
 ```
 
-The $E(Mortality|Year,Week) = \alpha +  f_1(Year) + f_2(Week)$
+The probabalistic model is as follows: 
 
-Where $f_1(Year) = \beta_0 +\beta_1Year_1 + \epsilon_1$
+$E(Mortality|Year,Week) = \beta_0 +\beta_1Year_1+ f_1(Week)$
 
-and where $f_2(Week) = \sum_{m = 1}^M \beta_mh_m(Week)$ and m are the number of knots. 
+Where here $f_1(Week) = \sum_{m = 1}^M \beta_mh_m(Week)$ and m are the number of knots. 
+
+
+\newpage
+
 
 ## 2.3 
 
@@ -124,24 +140,41 @@ aM + geom_line(aes(y = fitted(addM)),col = "red")
 
 The fit seems to be decent and it follows the general pattern of the Mortality but it has problems following along with the higher spikes and at times where it peaks two times during a year.
 
+
+```{r}
+summary(addM)
+```
+
+The linear Year component is not contributing in a significant manner to the GAM model. The spline component has an estimated degrees of freeom of 8.6 and  according to the F-test the component is significant on a 5 % level. 
+
 ```{r}
 plot(addM)
 ```
 
 The spline-function plot shows how the pattern for the spline component model predicts each week. The mortality seems to peak around the first week of every year. Between week 20 and 40 there seem to be a lower mortality rate according to the spline model component. Overall it seems like the mortality rate increases during the autumn and winter months and decreases during the summer period. 
 
+\newpage
+
+
 ## 2.4 
 
 ```{r}
 
-for (spval in c(-100,1,50,10000)){
-  plot(aM + geom_line(aes(y = fitted(gam(Mortality ~ Year + s(Week, sp = spval),data = Infu))),col = "red") +
-   labs(title = paste("Fits when lambda is:",spval) ))
+for (spval in c(0,10,500,50000)){
+  foraddM<-gam( Mortality ~ Year + s(Week, k = 51), data = Infu, sp = spval )
+  
+  plot(aM + 
+         geom_line(aes(y = as.data.frame(fitted(foraddM))), col = "red") +
+   labs(title = paste("Fits when lambda is:",spval))
+   ) 
 }
 
 ```
 
-When lambda is raised the penalty factor increases and in these four plots we can se how the adhesiveness of the fits diminishes when the penalty factor is raised. 
+When lambda is raised the penalty factor increases and in these four plots we can se how the adhesiveness of the fits diminishes when the penalty factor is raised. One can se that rasing the lambda value from 0 to 10 already penalizes the spline in a way that it loses its curviness. 
+
+\newpage
+
 
 ## 2.5 
 
@@ -150,20 +183,31 @@ aI + geom_line(aes(y=resid(addM),x = Time),col = "lightblue")
 
 ```
 
-There seem to be some large residuals coincides with the peaks of the comfirmed Influenza cases. Over the whole time series the residuals doesn't seem to have some trend deviating from the y-intercept  y = 0. 
+There seem to be some large residuals coincides with the peaks of the comfirmed Influenza cases and directly after the peaks as well. This is those parts of the peaks that the model fail to model. Over the whole time series the residuals doesn't seem to have some trend deviating from the y-intercept  y = 0. All through the time series the residuals have a up and down pattern (temporal pattern) which is the model failing to predict the small variations. 
+
+\newpage
+
 
 ## 2.6
 
 ```{r}
-add26<-gam(Mortality ~ s(Week) + s(Year, k = 9) + s(Influenza) ,data = Infu)
+add26<-gam(Mortality ~ s(Week, k = length(unique(Week))-1) + s(Year, k = 9) + s(Influenza,k = length(unique(Influenza))-1) ,data = Infu)
 aM + geom_line(aes(y =fitted(add26)), col ="red")
 ```
 
-Compared to the plot in 2.3 this model seem to fit the data a bit better as it follows the spikes better. 
+Compared to the plot in 2.3 this model seem to fit the data a much better as it follows the spikes better. The noise in the summmer months are still hard for the model to follow, although i don't think it would be appropriate to try to model this variation. 
 
 
 ```{r}
 summary(add26)
 ```
 
-Accordin to the F-test for the smooth terms the spline function for influenza seems to contribute to the GAM-model i a significant manner as the p-value is below the standard 0.05 level.  
+According to the F-test for the smooth terms the spline function for influenza seems to contribute to the GAM-model i a significant manner as the p-value is below the standard 0.05 level. So yes the influenza variable is a part of the explanation of the mortality rate in Sweden.   
+
+\newpage
+
+#Code
+
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
+
