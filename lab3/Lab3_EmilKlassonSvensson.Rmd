@@ -170,7 +170,7 @@ library(partykit)
 
 myreturn<-matrix(ncol=2,nrow=2)
 colnames(myreturn) <- c("Train","Test")
-rownames(myreturn) <- c("Gini","Deviance")
+rownames(myreturn) <- c("Deviance","Gini")
 
 
 #For the deviance 
@@ -281,13 +281,17 @@ rawBayes<- rawprobs[,2]/rawprobs[,1] #good/bad
 lossMat<-matrix(c(0,10,1,0),ncol=2)
 
 
-table(Predicted=ifelse(rawBayes > lossMat[2,1]/lossMat[1,2],"Good","Bad" ),Observed=csTrain$good_bad)
+lossBayBay<-table(Predicted=ifelse(rawBayes > lossMat[2,1]/lossMat[1,2],"Good","Bad" ),Observed=csTrain$good_bad)
 #table(Predicted=ifelse(rawBayes > lossMat[1,2]/lossMat[2,1],"Good","Bad" ),Observed=csTrain$good_bad)
+print(lossBayBay)
+1-sum(diag(lossBayBay)) / nrow(csTrain)
 
 rawprobsTest<-predict(baybay,csTest,type = "raw")
 
 rawBayesTest<- rawprobsTest[,2]/rawprobsTest[,1] #good/bad
-table(Predicted=ifelse(rawBayesTest > lossMat[2,1]/lossMat[1,2],"Good","Bad" ),Observed=csTest$good_bad)
+lossTable<-table(Predicted=ifelse(rawBayesTest > lossMat[2,1]/lossMat[1,2],"Good","Bad" ),Observed=csTest$good_bad)
+print(lossTable)
+1-sum(diag(lossTable)) / nrow(csTest)
 
 
 ```
