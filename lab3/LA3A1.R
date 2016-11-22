@@ -10,6 +10,8 @@ crabs <- read.csv("lab3/australian-crabs.csv")
 library(ggplot2)
 p<- ggplot(data = crabs) + geom_point(aes(x = RW, y =CL, col = sex))
 plot(p)
+
+
 attach(crabs)
 # 1.2 
 
@@ -160,7 +162,7 @@ p + geom_abline(intercept = 18.03, slope = 5)
 lda(ldaF[,1] ~ldaM[,1])
 
 
-length(ldaM > ldaF) 
+length(ldaM > ldaF)
 
 t(cbind(RW,CL)) %*% solve(mySig) %*% (myMu[2,2:3] - myMu[1,2:3])
 

@@ -1,5 +1,5 @@
 ---
-title: "Lab1B2_EmilKlassonSvensson"
+title: "Computer Lab 1 Block 2"
 author: "Emil K Svensson"
 date: "19 November 2016"
 output:
@@ -124,7 +124,7 @@ addM <- gam(Mortality ~ Year + s(Week, k = 51),data = Infu )
 
 The probabalistic model is as follows: 
 
-$E(Mortality|Year,Week) = \beta_0 +\beta_1Year_1+ f_1(Week)$
+$g(\mu)=E(Mortality|Year,Week) = \beta_0 +\beta_1Year_1+ f_1(Week)$
 
 Where here $f_1(Week) = \sum_{m = 1}^M \beta_mh_m(Week)$ and m are the number of knots. 
 
