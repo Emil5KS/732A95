@@ -96,9 +96,6 @@ $x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) = -x^T_{CL}(w_{Ma
 
 $(x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) )/ -(w_{Male} - w_{Female}) = x^T_{CL}$
 
-$(x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) )/ -(w_{Male} - w_{Female}) = x^T_{CL}$
-
-
 ## 1.3 
 
 
@@ -115,7 +112,18 @@ ggplot(data = results$myClass) + geom_point(aes(x = RW, y =CL, col = Predicted))
 
 ```
 
+
+The line was calculated to 
+
+$$`r results[[4]][1]`+ x^T_{RW}(`r results[[4]][2]`)   = x^T_{CL} $$
+
 The decision line divides the data nicely but i has some issiues when RW is below 12 where the two groups are closer in distance. 
+
+The two discriminant functions were calculated to 
+
+$$\delta_{male}(x) = x^T(`r results[[1]][1]`) + `r results[[2]][1]`  $$
+$$\delta_{female}(x) = x^T(`r results[[1]][2]`) + (`r results[[2]][2]`)$$ 
+
 
 ## 1.4
 
@@ -242,10 +250,11 @@ tT<-table(ifelse(predTest[,1]>predTest[,2],"bad","good"),csTest$good_bad)
 paste("Missclassification rate for test data",1-(sum(diag(tT))/nrow(csTest)))
 ```
 
-The tree uses the variables Savings, duration and history for the decision boundaries. The missclassification rate is 0.251 which is  worse than the initial model, although the mcr for the test is actualy lower than the mcr for the traning data. 
+The tree uses the variables Savings, duration and history for the decision boundaries. The missclassification rate is 0.251 which is  worse than the initial model, although the mcr for the test (2.48) is actualy lower than the mcr for the traning data. 
 
 ```{r}
 plot(best)
+text(best)
 ```
 
 Something something, important. 
