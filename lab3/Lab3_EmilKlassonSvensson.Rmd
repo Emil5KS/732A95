@@ -3,6 +3,7 @@ title: "Computer Lab 3"
 author: "Emil K Svensson"
 date: "Sys.Date()"
 output:
+  pdf_document: default
   html_document: default
 subtitle: Introduction to Machine Learning
 ---
@@ -94,7 +95,11 @@ $x^T_{CL}(w_{Male} - w_{Female}) +x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} 
 
 $x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) = -x^T_{CL}(w_{Male} - w_{Female})$
 
-$(x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) )/ -(w_{Male} - w_{Female}) = x^T_{CL}$
+And we arrive the final result as. 
+
+$\frac{(x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) )}{ -(w_{Male} - w_{Female})} = x^T_{CL}$
+
+This is expressed as y = CL and x = RW, which means this decision boundary needs to be plottet with the right variable on the right axis.
 
 ## 1.3 
 
@@ -107,7 +112,7 @@ results <- LDA(crabs[,c(5,6,2)])
 
 #predicted classes + desicion boundaries
 ggplot(data = results$myClass) + geom_point(aes(x = RW, y =CL, col = Predicted)) + geom_abline(intercept = results$myModel[1], slope = results$myModel[2], 
-    col = "Red") + 
+    col = "orange") + 
   labs(title = "Predicted values for the LDA() with a decision boundary")
 
 ```
@@ -140,6 +145,9 @@ ggplot(data = results$myClass) + geom_point(aes(x = RW, y =CL, col = ifelse(myLo
 
 One visible difference in the plots are that an observation located close to the line at CL = 37 and RW = 14 is now classified as a male wheras it was classified as a female. Other than this it is hard to disguinsh any visible diffrences. 
 
+The line was calculated as follows.
+
+$$\frac{b_0 + b_{RW}}{b_{CL}}    $$
 
 ```{r}
 cat("For the Logistic regression \n")
@@ -228,16 +236,17 @@ rad <- 1
   for (i in 2:15) {  
     tDev22         <-      prune.tree(tDev2, best = i)
     valid23[rad,1] <-      deviance(tDev22)
-    valid23[rad,2] <-      deviance(predict(tDev22,newdata = csValid,type = "tree"))
+    valid23[rad,2] <-      2 * deviance(predict(tDev22,newdata = csValid,type = "tree"))
     rad <- rad + 1 
 }
 
 valid23$best <- 2:15
 ggplot(data = valid23,aes(x=best)) + geom_line(aes(y=trainS),col="red") + geom_line(aes(y=testS),col = "blue") + 
-  labs(title = "The optimal number of leafs", x= "Number of leaf nodes", y= "Deviance", legend = c("Test","Train"))
+  labs(title = "The optimal number of leafs", x= "Number of leaf nodes", y= "Deviance")
 
 
 ```
+Validation is represented as the blue line and Traning as the red line, the deviance-fuction uses a summation over all observations, therefor the validation deviance is doubled to get a more resonable graph.
 
 The optimal tree is the the one with 4 leafs is the optimal tree as it has the lowest validation deviance weher the training deviance is the lowest before it starts to rise again. 
 
@@ -257,7 +266,8 @@ plot(best)
 text(best)
 ```
 
-Something something, important. 
+We do not know about the variables so it is hard to see if these are resonable splits. One could guess that people with less than 2.5 (k is my interpretation) in savings are probably a person with a more straind economy and there for more likely to default. 
+
 
 ## 2.4 
 
