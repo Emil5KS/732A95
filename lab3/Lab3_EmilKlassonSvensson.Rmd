@@ -1,10 +1,9 @@
 ---
 title: "Computer Lab 3"
 author: "Emil K Svensson"
-date: "Sys.Date()"
+date: "2016-11-25"
 output:
   pdf_document: default
-  html_document: default
 subtitle: Introduction to Machine Learning
 ---
 
@@ -95,11 +94,11 @@ $x^T(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) = 0$
 $x^T_{CL}(w_{Male} - w_{Female}) +x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) = 0$
 
 
-$x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) = -x^T_{CL}(w_{Male} - w_{Female})$
+$x_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) = -x_{CL}(w_{Male} - w_{Female})$
 
 And we arrive the final result as. 
 
-$\frac{(x^T_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) )}{ -(w_{Male} - w_{Female})} = x^T_{CL}$
+$\frac{(x_{RW}(w_{Male} - w_{Female}) + (w_{0 Male} - w_{0 Female}) )}{ -(w_{Male} - w_{Female})} = x_{CL}$
 
 This is expressed as y = CL and x = RW, which means this decision boundary needs to be plottet with the right variable on the right axis.
 
@@ -255,7 +254,7 @@ ggplot(data = valid23,aes(x=best)) + geom_line(aes(y=trainS),col="red") + geom_l
 
 
 ```
-Validation is represented as the blue line and Traning as the red line, the deviance-fuction uses a summation over all observations, therefor the validation deviance is doubled to get a more resonable graph.
+Validation is represented as the blue line and Traning as the red line, the deviance-fuction uses a summation over all observations in each data set. Since the validation is half the number of observations the validation deviance is doubled to get a more logical graph to interpret in a bias/variance trade off way. 
 
 The optimal tree is the the one with 4 leafs is the optimal tree as it has the lowest validation deviance weher the training deviance is the lowest before it starts to rise again. 
 
@@ -329,7 +328,9 @@ print(lossTable)
 
 ```
 
-We now classify more observations as Bad although they are Good. That has to do with the Lossfunction we implemented that says that we need to be 10 times as sure than normal that a prediction is Good for us to classify it as a good pretiction. Because of this every observation that would normaly be classified as "good" when the probability for good is larger than bad now needs to be 10 times larger than bad for it to be good. 
+We now classify more observations as Bad although they are Good. That has to do with the Lossfunction we implemented that says that we need to be 10 times as sure than normal. Because of this every observation that would normaly be classified as "good" when the probability for good is larger than bad now needs to be 10 times larger than bad for it to be good. 
+
+This is a powerfull tool if we want to minimize a certain amount of False positives or True positives depending on the case. In this case a bank don't want bad lenders to be predicted as good people as that would be more hurtful for the bussiness and the bank don't want to give people the benefit of the doubt and rather take secure earnings.  
 
 \newpage
 
