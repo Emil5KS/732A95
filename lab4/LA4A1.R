@@ -38,78 +38,131 @@ plot(cv.tree(state.tree))
 state.prune <- prune.tree(state.tree, best=3)
 
 plot(state.prune)
-
+text(state.prune)
 a12 <- a11 + geom_point( y = predict(state.prune), col = "red" )
 plot(a12)
 
 ggplot(data = data.frame(x = resid(state.prune))) + 
-  geom_histogram(aes(x = x), bins = 10)
+  geom_histogram(aes(x = x), bins  = 10)
 
 # a bitt shotty, to many residuals in the right tail, but overall ok. 
 
-## 2.3
+## 1.3
 
 library(boot)
 
 tree.fun <- function(data, ind){
   
   data <- data[ind,]
-  trio <- tree(EX ~ MET, data = data, minsize = 8 , split = "deviance")
-  return( predict(trio, newdata = data) )
+  trio <- tree(EX ~ MET, data = data,
+               control = 
+                 tree.control( minsize = 8, nobs = nrow(data))
+               )
+  trio <- prune.tree(trio, best = 3)
+  return( predict(trio, newdata = State) )
   
 }
 
 set.seed(12345)
 tree.boot <- boot(State, tree.fun, R = 1000)
 
-tree.boot$t
-
-predict(tree.boot)
-boot.ci(tree.boot, type = "norm")$normal
 
 
 State.plot <- data.frame(lower =envelope(tree.boot)$point[2,])
 State.plot$upper <-  envelope(tree.boot)$point[1,]
 State.plot$predicted<-predict(state.prune)
+State.plot$EX <- State$EX 
+State.plot$MET <- State$MET
 
-library(reshape2)
+ggplot(data = State.plot) + 
+  geom_point(aes(x = MET, y = EX)) +
+  geom_point(aes(x = MET, y = predicted), col = "red") +
+  geom_ribbon(aes(x = MET ,ymin = lower, ymax = upper), alpha = 0.2)
 
-State.plot<-melt(State.plot)
-State.plot$row <- rep(State$MET,times = 3)
-a11 + geom_line(data =  State.plot, aes(x = row,y = value, col =variable ))
+#library(reshape2)
+#State.plot<-melt(State.plot)
+#State.plot$row <- rep(State$MET,times = 3)
+#a11 + geom_line(data =  State.plot, aes(x = row,y = value, col =variable ))
 
 
-## 2.4
+## 1.4
 
-tree.fun.para <- function(data, ind){
-  
-  data <- data[ind,]
-  mean(data$EX)
-  trio <- tree(EX ~ MET, data = data, minsize = 8 , split = "deviance")
-  preD<-predict(trio,data)
-  
-  myPredictions<- rnorm(length(preD),mean = mean(preD), sd =  sd(resid(trio)) )
-  
-  return( myPredictions )
-  
+
+
+
+myrng <- function(data, model) {
+  data1<-data.frame(EX = data$EX, MET = data$MET)
+  n<-nrow(data1)
+  data1$EX <- rnorm(n,predict(model, newdata=data1),sd(resid(model)))
+  return(data1)
 }
 
+para.fun <- function(data1){ 
+  
+  trio <- tree(EX ~ MET, data = data1, 
+                 control = 
+                   tree.control( minsize = 8, nobs = nrow(data1)))
+  trio <- prune.tree(trio, best = 3)
+    #predict values for all Area values from the original data
+  priceP <- predict(trio,newdata=data1) 
+  return(priceP)
+} 
+
+tree.boot.para <- boot(State, statistic = para.fun, R=1000, 
+            mle=state.prune ,ran.gen = myrng, sim="parametric")
 
 set.seed(12345)
-tree.boot.para <- boot(State, tree.fun.para, R = 1000)
+State.plot$lower2 <-  envelope(tree.boot.para)$point[2,]
+State.plot$upper2 <-  envelope(tree.boot.para)$point[1,]
 
-tree.boot$t
+ggplot(data = State.plot) + 
+  geom_point(aes(x = MET, y = EX)) +
+  geom_point(aes(x = MET, y = predicted), col = "red") +
+  geom_ribbon(aes(x = MET ,ymin = lower2, ymax = upper2), alpha = 0.2)
 
-boot.ci(tree.boot.para, type = "norm")$normal
+
+## prediction enda som är nytt att predict nu använder State istället för data-variabeln 
+
+para.fun.p <- function(data1){ 
+  
+  trio <- tree(EX ~ MET, data = data1, 
+               control = 
+                 tree.control( minsize = 8, nobs = nrow(State)))
+  trio <- prune.tree(trio, best = 3)
+  #predict values for all Area values from the original data
+  priceP <- predict(trio,newdata=State) 
+  priceP <- rnorm(n = nrow(data1), mean = priceP, sd = sd(resid(trio)))
+  return(priceP)
+} 
+
+set.seed(12345)
+tree.boot.para.p <- boot(State, statistic = para.fun.p, R=1000, 
+                       mle=state.prune ,ran.gen = myrng, sim="parametric")
+
+State.plot$lower3 <-  envelope(tree.boot.para.p)$point[2,]
+State.plot$upper3 <-  envelope(tree.boot.para.p)$point[1,]
+
+ggplot(data = State.plot) + 
+  geom_point(aes(x = MET, y = EX)) +
+  geom_point(aes(x = MET, y = predicted), col = "red") +
+  geom_ribbon(aes(x = MET ,ymin = lower3, ymax = upper3), alpha = 0.2,col = "orange",fill ="orange")
+
+
+
+
+
+
+
+
 #State.plot <- State[c("EX","MET")]
-State.plot <- data.frame(lower =envelope(tree.boot.para)$point[2,])
-State.plot$upper <-  envelope(tree.boot)$point[1,]
-State.plot$predicted<-predict(state.prune)
+# State.plot <- data.frame(lower =envelope(tree.boot.para)$point[2,])
+# State.plot$upper <-  envelope(tree.boot)$point[1,]
+# State.plot$predicted<-predict(state.prune)
 
-library(reshape2)
+# library(reshape2)
 
-State.plot<-melt(State.plot)
-State.plot$row <- rep(State$MET,times = 3)
-a11 + geom_line(data =  State.plot, aes(x = row,y = value, col =variable ))
+# State.plot<-melt(State.plot)
+# State.plot$row <- rep(State$MET,times = 3)
+# a11 + geom_line(data =  State.plot, aes(x = row,y = value, col =variable ))
 
 

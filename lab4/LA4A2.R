@@ -78,6 +78,7 @@ pP2<-ggplot(data = eigenvectors) + geom_point(aes(x = 1:126, y = pca2), col = "d
 gRid<-grid.arrange(pP,pP2,ncol = 2, top ="PCA Trace plots ")
 grid.newpage()
 grid.draw(gRid)
+library(grid)
 ## 2.3 
 
 library(fastICA)
