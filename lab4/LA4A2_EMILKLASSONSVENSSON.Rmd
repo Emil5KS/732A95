@@ -2,7 +2,7 @@
 title: "Computer Lab 4"
 author: "Emil K Svensson"
 date: "2 December 2016"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -279,7 +279,9 @@ grid.draw(gRid)
 
 ```
 
-Looks similar to the PCA trace-plots but flipped. This is because ICA and PCA has different vectors that try to explain the dataset. The PCA tries to maximise the variance with its vectors and there for draws the vectors in a different way than the ICA. 
+The W' is the ICA loadings so its the equivalent of the eigenvectors in the PCA. 
+
+These Looks similar to the PCA trace-plots but flipped. This is because ICA and PCA has different vectors that try to explain the dataset. The PCA tries to maximise the variance with its vectors and there for draws the vectors in a different way than the ICA. In the IC2 (X2) there are some loadings that are zero and therefor these variables are explained by the other variables. 
 
 ### b) 
 
@@ -321,6 +323,13 @@ ggplot(smelt,aes(x = nocomp, y = value, col=variable)) + geom_line() +
 It's resonable to select either 7 or around 17 components to have in the model as after that the number of components added does not contribute to a lower MSEP.
 
 
+
+\newpage
+
+#Code
+
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
 
 
 

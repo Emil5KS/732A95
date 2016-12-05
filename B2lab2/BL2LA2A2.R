@@ -39,7 +39,7 @@ for (i in 1:100) {
   bfr.SE[i]       <- sum((bfr.predictions - test$Bodyfat_percent))
 }
 
-mean((bfr.SE/100)^2)
+mean((bfr.SE/100)^2) 
 
 ### Det här tror vi är fel, men Caroline säger att det är rätt
 bfr.SE <- 0
@@ -50,27 +50,31 @@ for (i in 1:100) {
   bfr.predictions <- predict(bfr.tree,test)
   bfr.SE[i]       <- mean((bfr.predictions - test$Bodyfat_percent)^2)
 }
-mean(bfr.SE)
+mean(bfr.SE) 
 plot(bfr.SE) 
 
 
 #Vafan gör jag? 
 
 ## 2.2 
-bfr.SE2 <- c()
+bfr.SE2 <- c() 
 set.seed(1234567890)
+
+bfr.tree22 <- tree(Bodyfat_percent ~. ,data = BFR)
+bfr.cv <- cv.tree(bfr.tree22, K = 3)
+best.size <- bfr.cv$size[which.min(bfr.cv$dev)]
+#bfr.tree22 <- prune.tree(bfr.tree22, best = best.size)
+
+
+
 for (i in 1:100){ 
   BFRre<- BFR[sample(nrow(BFR),replace = TRUE),]
-  
   bfr.tree22 <- tree(Bodyfat_percent ~. ,data = BFRre )
-  bfr.cv <- cv.tree(bfr.tree22, K = 3)
-  best.size <- bfr.cv$size[which.min(bfr.cv$dev)]
   bfr.tree22 <- prune.tree(bfr.tree22, best = best.size)
-  
-  bfr.SE2[i] <- sum(predict(bfr.tree22, newdata = BFR) - BFR$Bodyfat_percent)
-  print(i)
-}
+  bfr.SE2[i] <- mean( (predict(bfr.tree22, newdata = BFR) - BFR$Bodyfat_percent)^2) 
+} 
 
+mean(bfr.SE2)
 
 mean(  (bfr.SE2/100)^2)
 
@@ -78,3 +82,14 @@ mean(  (bfr.SE2/100)^2)
 summary(bfr.cv)
 plot(bfr.cv)
 predict(bfr.cv)
+
+
+
+## 2.3 
+
+#Same for 2.1 and 2.2 but with all the data in 2.1. 
+
+
+
+
+
