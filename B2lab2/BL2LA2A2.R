@@ -83,7 +83,34 @@ summary(bfr.cv)
 plot(bfr.cv)
 predict(bfr.cv)
 
+# Ännu en version
 
+
+#fuck <- function(){
+set.seed(1234567890)
+BFR$index<-sample(c(rep(1,36),rep(2,37),rep(3,37)))
+bfr.SE2<-c()
+iter <- c()
+subset(BFR,index == 1)[,c(-4)]
+
+for (set in 1:3){
+  
+  for (i in 1:100){ 
+    
+    BFRre<-subset(BFR,BFR$index != set)[,c(-4)]
+    #BFRre<- BFRa[sample(nrow(BFRa),replace = TRUE),]
+    bfr.tree22 <- tree(Bodyfat_percent ~. ,data = BFRre )
+    bfr.tree22 <- prune.tree(bfr.tree22, best = best.size)
+    BFRpred<-subset(BFR,BFR$index == set)[,c(-4)]
+    bfr.SE2[i] <- mean( (predict(bfr.tree22, newdata = BFRpred) - BFRpred$Bodyfat_percent)^2) 
+    
+  } 
+  iter[set]<- mean(bfr.SE2)
+} 
+#}
+#debugonce(fuck)
+#fuck()
+subset
 
 ## 2.3 
 
