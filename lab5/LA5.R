@@ -81,21 +81,34 @@ my_magic_kernel <- function(data ,time, date, longlat = c(59.4446, 13.3374) ){
 #Longitude and Latitude distances.  
 dmat <- geosphere::distHaversine(p1 = cbind(data$latitude,data$longitude) , p2 = longlat)
 gkdmat<- gk(dmat,0)
+gkdmat <- gkdmat/sum(gkdmat)
 
-#timme
-timevec <- strptime(data$time,format = "%H:%M:%S")
-gktime<-gk(timevec,time)
 #datum
 datevec <- as.Date(st$date)
 gkdate<-gk(datevec,date)
+gkdate <- gkdate/sum(gkdate)
 
+predictions <- data.frame(time=1,mean=1)
+i <- 1 
+for (timme in time){
+  
+#timme
+timevec <- strptime(data$time,format = "%H:%M:%S")
+gktime<-gk(timevec,timme)
+gktime <- gktime/sum(gktime)
 
-alltemps <- cbind(gkdmat,gktime,gktime)*data$air_temperature
-return(alltemps) 
+alltemps <- (cbind(gkdmat,gktime,gkdate)*data$air_temperature) 
+predictions[i,] <- c(timme,mean(colSums(alltemps)))
+i <- i + 1 
+}
+return(predictions) 
   
 }
 
-as<-my_magic_kernel(data = st ,time ="01:00:00", date = "2016-03-04", longlat = c(59.4446, 13.3374) )
+my_magic_kernel(data = st ,time =times, date = "2016-12-24", longlat = c(a, b) )
+
+sum(rowSums(as))
+mean(colSums(as))
 debugonce(my_magic_kernel)
 
 
@@ -111,4 +124,17 @@ strftime(datum, format = "", tz = "", usetz = FALSE)
 strptime(datum, format = "")
 
 as.POSIXt(datum2)
-strftime("2004-05-28")
+strftime("2004-05-28")  
+
+paste
+substr("1943-09-06",start=1,stop =9)
+
+mydat<-subset(st, strftime(st$date) < strftime("1943-09-06") )
+
+### Att göra
+#Hitta en filter funktion som filtrerar ut rätt datum, ie en över det datum vi vill ha.
+#Rätta till kernelsummorna. Det ska summera alla kernelvikter och dela på y*alla kernels
+
+## I block 2 får jag fixa min Log likelihood och min CV eventuellt.
+
+

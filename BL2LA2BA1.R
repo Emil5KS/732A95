@@ -61,7 +61,11 @@ pi
 mu
 
 
-## Här ska algoritmen skrivas 
+## Här ska algoritmen skrivas  ############
+
+
+
+
 #ml<- function(){
 for(it in 1:max_it) { 
   plot(mu[1,], type="o", col="blue", ylim=c(0, 1))
@@ -123,6 +127,11 @@ for(it in 1:max_it) {
 pi
 mu
 plot(llik[1:it], type="o")
+
+
+
+
+### Nedan är skit. 
 debugonce(ml)
 ml()
 
