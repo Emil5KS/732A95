@@ -15,7 +15,7 @@
 
 
 
-
+for (i in 1){
 set.seed(1234567890)
 max_it <- 100 # max number of EM iterations
 min_change <- 0.1 # min change in log likelihood between two consecutive EM iterations
@@ -59,7 +59,7 @@ for(k in 1:K) {
 
 pi 
 mu
-
+}
 
 ## Här ska algoritmen skrivas  ############
 
@@ -75,10 +75,24 @@ for(it in 1:max_it) {
   #Sys.sleep(0.5)
   # E-step: Computation of the fractional component assignments
   # Your code here
+  bern<-matrix(nrow =N, ncol = K)
+  
+  
+  
+  for (i in 1:nrow(x)){ 
+    for (j in 1:nrow(mu)){
+      
+      bern[i,j]<-prod(mu[j,]^(x[i,])*(1-mu[j,])^(1-x[i,])) 
+      #print(z[i,j])
+    }
+  }
+  
+  
+  
   for (i in 1:nrow(x)){ 
     for (j in 1:nrow(mu)){
     
-    z[i,j]<-prod(mu[j,]^(x[i,])*(1-mu[j,])^(1-x[i,])) * pi[j]
+    z[i,j]<-bern[i,j] * pi[j]/sum(pi*bern[i,])
     #print(z[i,j])
     }
   }
@@ -88,16 +102,26 @@ for(it in 1:max_it) {
     
   } 
   #print(dim(z)) 
-  part2<- c()
+  part<- c()
   tempvar <- c()
   #Log likelihood computation.
-  for (rad in 1:nrow(x)){ 
-    for (klass in 1:nrow(mu)){
-  part1 <- x[rad, ] * log( mu[klass, ] ) + (1 - x[rad, ])*log(1 - mu[klass, ])
-  part2[klass]<-z[rad, klass]*(log(pi[klass]) + sum(part1))
-    }
-    tempvar[rad] <- sum(part2) 
-  }
+   for (rad in 1:nrow(x)){ 
+     for (klass in 1:nrow(mu)){
+              part[klass]<- (pi[klass]*bern[rad,klass])
+          }
+          tempvar[rad] <- log(sum(part)) 
+        } 
+  #original solution
+  # for (rad in 1:nrow(x)){ 
+  #   for (klass in 1:nrow(mu)){
+  # part1 <- x[rad, ] * log( mu[klass, ] ) + (1 - x[rad, ])*log(1 - mu[klass, ])
+  # part2[klass]<-z[rad, klass]*(log(pi[klass]) + sum(part1))
+  #   }
+  #   tempvar[rad] <- sum(part2) 
+  # }
+  # 
+  # #should be sum_n LOG sum_k pi_k p(x_n | mu_k)
+  # 
   
   llik[it] <- sum(tempvar)
   cat("iteration: ", it, "log likelihood: ", llik[it], "\n")  
@@ -106,7 +130,7 @@ for(it in 1:max_it) {
   # Your code here
   if (it >1){ 
     if(abs(abs(llik[it]) - abs(llik[it-1])) < min_change){ 
-  stop("The log-likelihood as not change significantly, returning from loop")
+  return("The log-likelihood as not change significantly, returning from loop")
     }
   }
   #M-step: ML parameter estimation from the data and fractional component assignments
@@ -129,20 +153,31 @@ mu
 plot(llik[1:it], type="o")
 
 
-
-
-### Nedan är skit. 
 debugonce(ml)
 ml()
 
+animation::saveGIF({
+  ml()
+}, movie.name = "BallaBalla.gif", interval = 0.1, nmax = 30, ani.width = 600, 
+ani.height = 600)
 
 
 
 
-9
 
 
 
+
+
+
+
+
+
+
+
+
+
+### Nedan är skit. 
 
 
 
