@@ -1,7 +1,7 @@
 ---
 title: "Lab 2 Block 2"
 author: "Emil K Svensson"
-date: "8 December 2016"
+date: "9 December 2016"
 output:
   html_document: default
   pdf_document: default
@@ -55,18 +55,27 @@ The upper bound for the MSE is 37.10301
 
 ```{r}
 
-bfr.SE2 <- c() 
 set.seed(1234567890)
+BFR$index<-c(rep(1,36),rep(2,37),rep(3,37))
+#BFR$index<-sample(c(rep(1,36),rep(2,37),rep(3,37)))
+bfr.SE2<-matrix(nrow=100,ncol=3)
+iter <- c()
+#subset(BFR,index != 1)[,c(-4)]
 
-bfr.tree22 <- tree(Bodyfat_percent ~. ,data = BFR)
-bfr.cv <- cv.tree(bfr.tree22, K = 3)
-best.size <- bfr.cv$size[which.min(bfr.cv$dev)]
-
-for (i in 1:100){ 
-  BFRre<- BFR[sample(nrow(BFR),replace = TRUE),]
-  bfr.tree22 <- tree(Bodyfat_percent ~. ,data = BFRre )
-  bfr.tree22 <- prune.tree(bfr.tree22, best = best.size)
-  bfr.SE2[i] <- mean( (predict(bfr.tree22, newdata = BFR) - BFR$Bodyfat_percent)^2) 
+for (set in 1:3){
+  BFRa<-subset(BFR,BFR$index != set)[,c(-4)]
+  BFRpred<-subset(BFR,BFR$index == set)[,c(-4)]
+  
+  print(c(nrow(BFRa),nrow(BFRpred),nrow(BFRa)+nrow(BFRpred)))
+  for (i in 1:100){ 
+    
+    
+    BFRre<- BFRa[sample(1:nrow(BFRa),replace = TRUE),]
+    bfr.tree22 <- tree(Bodyfat_percent ~. ,data = BFRre, split = "deviance" )
+    bfr.SE2[i,set] <- mean( (predict(bfr.tree22, newdata = BFRpred) - BFRpred$Bodyfat_percent)^2) 
+    
+    
+  } 
 } 
 
 mean(bfr.SE2)
@@ -77,28 +86,54 @@ This MSE is lower than in the previous question.
 
 ## 2.3 
 
-For the 2.1 the trees to the user would look like this. 
+For both cases the trees returned to the user would look like this. 
 
-```{r, eval = FALSE}
-
+```{r, eval = FALSE, echo = TRUE}
+trees <- list()
 for (i in 1:100) {
   samptrain<-BFR[sample(nrow(BFR),replace = TRUE),] 
   bfr.tree        <- tree(Bodyfat_percent ~. ,data = samptrain)
-  bfr.predictions <- predict(bfr.tree,test)
-  bfr.SE[i]       <- mean((bfr.predictions - test$Bodyfat_percent)^2)
+  trees[[i]]      <- bfr.tree
 }
 
 ```
 
 In this case the trees are fitted with all data instead of just the traning data. 
 
-For the 2.3 Cross Validation it's this case 
+# Assignment 3 
 
-```{r}
+## 3.1
+
+```{r, echo = TRUE}
+BFR <- read.csv2("bodyfatregression.csv")
+set.seed(1234567890)
+m <- blackboost(Bodyfat_percent ~ Waist_cm + Weight_kg, data = BFR)
+cvf <- cv(model.weights(m), type = "kfold")
+cvm <- cvrisk(m, folds = cvf, grid = 1:100)
+plot(cvm)
 
 ```
 
-Here there is something else or the same, who knows.
+The optimal number of boosting itterations are around 35, its hard to tell exactly with such messy ticks at the x-axis. The gray lines represent the different trees that are weighted together as the black line. 
+
+## 3.2 
+
+```{r, echo = TRUE}
+## 3.2 
+set.seed(1234567890)
+m2 <- blackboost(Bodyfat_percent ~ Waist_cm + Weight_kg, data = train, 
+                 control=boost_control(mstop=mstop(cvm)))
+
+cvf2 <- cv(model.weights(m2), type = "kfold")
+cvm2 <- cvrisk(m2, folds = cvf2, grid = 1:100)
+
+m2.train <- sum( (predict(m2,train) - train$Bodyfat_percent)^2)
+m2.test <- sum( (predict(m2,test) - test$Bodyfat_percent)^2)
+cat("SSE for traning:",m2.train,"\n SSE for test:",m2.test)
+```
+
+
+
 
 # Assignment 4
 
@@ -113,7 +148,7 @@ spamTest <- spam[3068:4601,]
 
 ```
 
-```{r}
+```{r, echo = TRUE}
 
 ada.trees<- sapply(X = seq(10,100,10), FUN = function(y) { 
   set.seed(1234567890)
@@ -134,6 +169,7 @@ table(Predicted = RFpredvals, Observed = spamTest$Spam)
 
 ```
 
+Above the code for the two different estimations, the Ada-tree has the family specified as AdaExp. 
 
 
 ```{r}
@@ -151,7 +187,7 @@ ggplot(data = mcrplot) +
 
 ```
 
-The missclassification rate for the randomforest-trees, represented by the blue dots is stable even for low number of trees compared to the Adaboost classification trees (represented by the red dots) that have high error rates for low number of trees. 
+The test missclassification rate for the randomforest-trees are represented by the blue dots is stable even for low number of trees compared to the Adaboost classification trees (represented by the red dots) that have high error rates for low number of trees. 
 
 
 
@@ -209,7 +245,6 @@ for(it in 1:max_it) {
   # points(mu[2,], type="o", col="red")
   # points(mu[3,], type="o", col="green")
   #points(mu[4,], type="o", col="yellow")
-  #Sys.sleep(0.5)
   # E-step: Computation of the fractional component assignments
   # Your code here
   bern<-matrix(nrow =N, ncol = K)
@@ -230,15 +265,12 @@ for(it in 1:max_it) {
     for (j in 1:nrow(mu)){
     
     z[i,j]<-bern[i,j] * pi[j]/sum(pi*bern[i,])
-    #print(z[i,j])
     }
   }
-  #print(dim(z))
   for (l in 1:nrow(z)){ 
     z[l,]<- z[l,]/sum(z[l,])
     
   } 
-  #print(dim(z)) 
   part<- c()
   tempvar <- c()
   #Log likelihood computation.
@@ -251,17 +283,16 @@ for(it in 1:max_it) {
   
   llik[it] <- sum(tempvar)
   #cat("iteration: ", it, "log likelihood: ", llik[it], "\n")  
-  #flush.console()
   # Stop if the lok likelihood has not changed significantly
-  # Your code here
+
   if (it >1){ 
     if(abs(abs(llik[it]) - abs(llik[it-1])) < min_change){ 
   return("The log-likelihood as not change significantly, returning from loop")
     }
   }
-  #M-step: ML parameter estimation from the data and fractional component assignments
-  # Your code here
   
+  #M-step: ML parameter estimation from the data and fractional component assignments
+
   pi <- colSums(z) / 1000 # pi_k-ML
   
   for (class in 1:nrow(mu)){
@@ -272,15 +303,16 @@ for(it in 1:max_it) {
    
 }  
   
-#} 
 
-pi
-mu
+#pi
+#mu
 plot(llik[1:it], type="o")
 
 ```
 
-And this is the gif for the points 
+A gif for the mu parameters can be found here. 
+
+http://github.com/Emil5KS/732A95/blob/master/B2lab2/BallaBalla.gif?raw=true
 
 ![](http://github.com/Emil5KS/732A95/blob/master/B2lab2/BallaBalla.gif?raw=true )
 
