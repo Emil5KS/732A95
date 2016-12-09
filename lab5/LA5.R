@@ -74,8 +74,8 @@ for (timme in times){
       timevec <- strptime(data$time,format = "%H:%M:%S")
       gktime<-gk(timevec,timme)
       
-      alltemps <- (cbind(gkdmat,gktime,gkdate)*data$air_temperature)/sum((gkdmat + gkdate + gktime)) 
-      predictions[i,] <- c(timme,mean(colSums(alltemps)))
+      alltemps <- rowSums(cbind(gkdmat,gktime,gkdate)*data$air_temperature)/sum((gkdmat + gkdate + gktime)) 
+      predictions[i,] <- c(timme,sum(alltemps))
       i <- i + 1 
 
 }

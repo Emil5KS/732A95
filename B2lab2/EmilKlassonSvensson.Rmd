@@ -2,7 +2,9 @@
 title: "Lab 2 Block 2"
 author: "Emil K Svensson"
 date: "8 December 2016"
-output: pdf_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE, message=FALSE,warning=FALSE}
@@ -254,7 +256,7 @@ for(it in 1:max_it) {
   # Your code here
   if (it >1){ 
     if(abs(abs(llik[it]) - abs(llik[it-1])) < min_change){ 
-  stop("The log-likelihood as not change significantly, returning from loop")
+  return("The log-likelihood as not change significantly, returning from loop")
     }
   }
   #M-step: ML parameter estimation from the data and fractional component assignments
@@ -277,5 +279,10 @@ mu
 plot(llik[1:it], type="o")
 
 ```
+
+And this is the gif for the points 
+
+![](http://github.com/Emil5KS/732A95/blob/master/B2lab2/BallaBalla.gif?raw=true )
+
 
 
