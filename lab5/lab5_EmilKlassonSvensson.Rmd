@@ -1,0 +1,96 @@
+---
+title: "Lab5_EmilKlassonSvensson"
+author: "Emil K Svensson"
+date: "9 December 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+set.seed(1234567890)
+library(geosphere)
+
+stations <- read.csv("lab5/stations.csv",header = TRUE)
+temps <- read.csv("lab5/temps50k.csv")
+st <- merge(stations,temps,by="station_number")
+
+
+my_magic_kernel <- function(data ,time, date, longlat = c(59.4446, 13.3374), h_days = 6, h_time = 4, h_distance = 100000){ 
+ 
+### Defining the kernel
+  
+gk <- function(x, xi){
+  #for the days
+  if( all(class(x) == "Date")) {
+    
+    xi <- as.Date(factor(xi),format = "%Y-%m-%d")
+    return(exp(-((abs( as.numeric(x - xi) )^2) / (h_days) ))) 
+  }
+  
+  #For the hours
+  if(class(x)  == c("difftime") ) {
+    
+    xi <- strptime(xi,"%H:%M:%S")
+    return(exp(-((abs( as.numeric(x) )^2) / (h_time)))) 
+  }  
+  
+  #For long and lat
+  return(exp(-((abs( (x - xi))^2) / (h_distance)))) 
+}  
+  
+  
+  #Initiatin objects for loop.
+  predictions <- data.frame(time=1,temp=1)
+  i <- 1 
+  
+for (timme in times){ 
+    
+  
+      mdate = strftime(paste(date,timme))
+      data<-subset(st,  strftime(paste(st$date,st$time)) < mdate)
+        
+      #Longitude and Latitude distances.  
+      dmat <- geosphere::distHaversine(p1 = cbind(data$latitude,data$longitude) , p2 = longlat)
+      gkdmat<- gk(dmat,0)
+      
+      #datum
+      datevec <- as.Date(st$date)
+      gkdate<-gk(datevec,date)
+      
+      
+      #timme
+      
+      difftimes<-difftime(strptime(data$time,format="%H:%M:%S"),strptime(timme,format = "%H:%M:%S"),units = "hours")      #timevec <- strptime(data$time,format = "%H:%M:%S")
+      gktime<-gk(difftimes,0)
+      
+      alltemps <- rowSums(cbind(gkdmat,gktime,gkdate)*data$air_temperature)/sum((gkdmat + gkdate + gktime)) 
+      predictions[i,] <- c(timme,sum(alltemps))
+      i <- i + 1 
+
+}
+  
+predictions[,1]<- as.factor(predictions[,1])
+predictions[,2]<- as.numeric(predictions[,2])
+return(predictions) 
+  
+}
+
+
+a <- 58.4274 
+b <- 14.826
+times <- c(paste0("0",seq(2,9,2),":00:00"),paste0(seq(10,24,2),":00:00"))
+
+
+
+as<-my_magic_kernel(data = st ,time = times, date = "2016-12-24",longlat = c(a,b), h_days = 7, h_time = 2, h_distance = 100000)
+
+as[,1] <- as.factor(as[,1])
+as[,2] <- as.numeric(as[,2])
+ggplot(data = as, aes(x= time,y=mean))+geom_point()+labs(x= "Time",y= "Temperature", title = "Temperature och christmas eve")
+```
+
+Looks like a warm christmas, again. 

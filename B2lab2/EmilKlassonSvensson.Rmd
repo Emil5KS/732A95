@@ -3,7 +3,6 @@ title: "Lab 2 Block 2"
 author: "Emil K Svensson"
 date: "9 December 2016"
 output:
-  html_document: default
   pdf_document: default
 ---
 
@@ -48,7 +47,7 @@ for (i in 1:100) {
 }
 mean(bfr.SE) 
 ```
-The upper bound for the MSE is 37.10301
+The upper bound for the MSE is estimated to 37.10301
 
 
 ## 2.2
@@ -82,7 +81,7 @@ mean(bfr.SE2)
 
 ```
 
-This MSE is lower than in the previous question. 
+The MSE estimated with Cross Validation-bagging was estimated to around 41, higher than the previous bagging estimation.
 
 ## 2.3 
 
@@ -90,15 +89,17 @@ For both cases the trees returned to the user would look like this.
 
 ```{r, eval = FALSE, echo = TRUE}
 trees <- list()
+
 for (i in 1:100) {
-  samptrain<-BFR[sample(nrow(BFR),replace = TRUE),] 
+  samptrain       <- BFR[sample(nrow(BFR),replace = TRUE),] 
   bfr.tree        <- tree(Bodyfat_percent ~. ,data = samptrain)
   trees[[i]]      <- bfr.tree
 }
 
 ```
 
-In this case the trees are fitted with all data instead of just the traning data. 
+Here the bagging-estimation of the regression tree is trained on the whole dataset istead of just two thirds of the data. 
+
 
 # Assignment 3 
 
@@ -114,7 +115,7 @@ plot(cvm)
 
 ```
 
-The optimal number of boosting itterations are around 35, its hard to tell exactly with such messy ticks at the x-axis. The gray lines represent the different trees that are weighted together as the black line. 
+The optimal number of boosting itterations are around 35, its hard to tell exactly with such messy ticks at the x-axis. The gray lines represent the different trees squared error that are weighted together as the black line in the boosting method. 
 
 ## 3.2 
 
@@ -169,7 +170,7 @@ table(Predicted = RFpredvals, Observed = spamTest$Spam)
 
 ```
 
-Above the code for the two different estimations, the Ada-tree has the family specified as AdaExp. 
+Above is the code for the two different estimations, the Ada-tree has the family specified as AdaExp. 
 
 
 ```{r}
@@ -246,16 +247,15 @@ for(it in 1:max_it) {
   # points(mu[3,], type="o", col="green")
   #points(mu[4,], type="o", col="yellow")
   # E-step: Computation of the fractional component assignments
-  # Your code here
+  
+  
   bern<-matrix(nrow =N, ncol = K)
-  
-  
   
   for (i in 1:nrow(x)){ 
     for (j in 1:nrow(mu)){
       
       bern[i,j]<-prod(mu[j,]^(x[i,])*(1-mu[j,])^(1-x[i,])) 
-      #print(z[i,j])
+      
     }
   }
   
@@ -271,8 +271,10 @@ for(it in 1:max_it) {
     z[l,]<- z[l,]/sum(z[l,])
     
   } 
+  
   part<- c()
   tempvar <- c()
+  
   #Log likelihood computation.
    for (rad in 1:nrow(x)){ 
      for (klass in 1:nrow(mu)){
@@ -283,8 +285,8 @@ for(it in 1:max_it) {
   
   llik[it] <- sum(tempvar)
   #cat("iteration: ", it, "log likelihood: ", llik[it], "\n")  
+  
   # Stop if the lok likelihood has not changed significantly
-
   if (it >1){ 
     if(abs(abs(llik[it]) - abs(llik[it-1])) < min_change){ 
   return("The log-likelihood as not change significantly, returning from loop")
@@ -310,11 +312,17 @@ plot(llik[1:it], type="o")
 
 ```
 
-A gif for the mu parameters can be found here. 
+A gif for the mu parameters through the 26 itterations can be found here. 
 
 http://github.com/Emil5KS/732A95/blob/master/B2lab2/BallaBalla.gif?raw=true
 
 ![](http://github.com/Emil5KS/732A95/blob/master/B2lab2/BallaBalla.gif?raw=true )
 
 
+\newpage
+
+#Code
+
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
 

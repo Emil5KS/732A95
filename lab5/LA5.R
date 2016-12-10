@@ -21,13 +21,13 @@ h_distance <- # These three values are up to the students
 a <- 58.4274 # The point to predict (up to the students)
 b <- 14.826
 date <- "2013-11-04" # The date to predict (up to the students)
-times <- c(paste0("0",1:9,":00:00"),paste0(10:24,":00:00"))
+times <- c(paste0("0",seq(2,9,2),":00:00"),paste0(seq(10,24,2),":00:00"))
 temp <- vector(length=length(times))
 # Students code here
 plot(temp, type="o")
 
 
-my_magic_kernel <- function(data ,time, date, longlat = c(59.4446, 13.3374), h_days = 7, h_time = 2,h_distance = 1000){ 
+my_magic_kernel <- function(data ,time, date, longlat = c(59.4446, 13.3374), h_days = 6, h_time = 4, h_distance = 100000){ 
  
 ### Defining the kernel
   
@@ -40,10 +40,10 @@ gk <- function(x, xi){
   }
   
   #For the hours
-  if(all(class(x)  %in% c("POSIXlt","POSIXt")) ) {
+  if(class(x)  == c("difftime") ) {
     
     xi <- strptime(xi,"%H:%M:%S")
-    return(exp(-((abs( as.numeric(x - xi) )^2) / (h_time)))) 
+    return(exp(-((abs( as.numeric(x) )^2) / (h_time)))) 
   }  
   
   #For long and lat
@@ -52,7 +52,7 @@ gk <- function(x, xi){
   
   
   #Initiatin objects for loop.
-  predictions <- data.frame(time=1,mean=1)
+  predictions <- data.frame(time=1,temp=1)
   i <- 1 
   
 for (timme in times){ 
@@ -71,33 +71,34 @@ for (timme in times){
       
       
       #timme
-      timevec <- strptime(data$time,format = "%H:%M:%S")
-      gktime<-gk(timevec,timme)
+      
+      difftimes<-difftime(strptime(data$time,format="%H:%M:%S"),strptime(timme,format = "%H:%M:%S"),units = "hours")      #timevec <- strptime(data$time,format = "%H:%M:%S")
+      gktime<-gk(difftimes,0)
       
       alltemps <- rowSums(cbind(gkdmat,gktime,gkdate)*data$air_temperature)/sum((gkdmat + gkdate + gktime)) 
       predictions[i,] <- c(timme,sum(alltemps))
       i <- i + 1 
 
 }
+  
+predictions[,1]<- as.factor(predictions[,1])
+predictions[,2]<- as.numeric(predictions[,2])
 return(predictions) 
   
 }
 
-as<-my_magic_kernel(data = st ,time =times, date = "2016-12-24", longlat = c(a, b) )
+as<-my_magic_kernel(data = st ,time = times, date = "2016-12-24",longlat = c(a,b), h_days = 7, h_time = 2, h_distance = 100000)
+
 
 sum(rowSums(as))
 mean(colSums(as))
 debugonce(my_magic_kernel)
 
 
-
-
-
-
-
-
-
-
+as[,1] <- as.factor(as[,1])
+as[,2] <- as.numeric(as[,2])
+ggplot(data = as, aes(x= time,y=mean))+geom_point()
+plot(as[,1],as[,2],type = "o")
 
 # gk <- function(x, xi){
 #   
@@ -163,4 +164,7 @@ debugonce(my_magic_kernel)
 # 
 # it <- 2
 
+
+
+strptime(st$time,format="%H:%M:%S") - strptime("01:00:00",format = "%H:%M:%S")
 
