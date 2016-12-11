@@ -14,8 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 set.seed(1234567890)
 library(geosphere)
 
-stations <- read.csv("lab5/stations.csv",header = TRUE)
-temps <- read.csv("lab5/temps50k.csv")
+stations <- read.csv("stations.csv",header = TRUE)
+temps <- read.csv("temps50k.csv")
 st <- merge(stations,temps,by="station_number")
 
 
@@ -93,4 +93,22 @@ as[,2] <- as.numeric(as[,2])
 ggplot(data = as, aes(x= time,y=mean))+geom_point()+labs(x= "Time",y= "Temperature", title = "Temperature och christmas eve")
 ```
 
-Looks like a warm christmas, again. 
+The temperature seem to be at warmest around noon and in almost a bell shaped pattern, which seems resonable when dealing with temperatures, it's cold during nighttime and warm during the day. Since the date i've chosen is christmas eve this year the kernel that takes in consideration of how long it was since the last observation isn't affecting the prediction so much, which is resonable since a observation six months ago alone doesn't say anything about the temperature six months in the future.
+
+In this scenario the time-component is probably the one affecting the prediction the most since it only cares about the time of the day and nothing elese. Here is a plot of the averages of the different time-periods.
+
+```{r}
+tempagg<- aggregate(st$air_temperature,list(factor(substr(st$time,start= 1,stop =2))),FUN = mean) 
+
+ggplot(data = tempagg, aes(x = Group.1, y =x )) +geom_point()+ 
+  labs(x= "hour of the day", y = "average temperature", title = " The mean temperature per hour for the SMHI-data")
+```
+
+The general shape of the means matches the pattern of the prediction very well. This servers as an indication that much of the weighting is controled by this kernel which seems sensible. The smoothing factor of two-hours might be a bit narrow, but it's a bell-shaped pattern it seems justified as we're using a gaussian kernel.
+
+The last kernel was the distance to the station the observation was recorded. This is also a pretty bad predictior, temperatures are a very regional occurences, the kernel smoother should be set to a low value, 100 000 is in this case a low value sincie it corresponds to 100 km which isn't that much considering the size of Sweden.  
+
+A more apropriate kernel to include would be one similar to the time-variable but in regards to the day of the year, but since this isn't SMHI and i don't have the time to do so i will consider this model very crude and shoudn't be used for predictions.
+
+
+
