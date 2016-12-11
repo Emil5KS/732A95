@@ -2,7 +2,7 @@
 title: "Lab5_EmilKlassonSvensson"
 author: "Emil K Svensson"
 date: "9 December 2016"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 set.seed(1234567890)
 library(geosphere)
+library(ggplot2)
 
 stations <- read.csv("stations.csv",header = TRUE)
 temps <- read.csv("temps50k.csv")
@@ -90,7 +91,8 @@ as<-my_magic_kernel(data = st ,time = times, date = "2016-12-24",longlat = c(a,b
 
 as[,1] <- as.factor(as[,1])
 as[,2] <- as.numeric(as[,2])
-ggplot(data = as, aes(x= time,y=mean))+geom_point()+labs(x= "Time",y= "Temperature", title = "Temperature och christmas eve")
+ggplot(data = as, aes(x= time,y=temp))+geom_point() +
+  labs(x= "Time",y= "Temperature", title = "Temperature on christmas eve")
 ```
 
 The temperature seem to be at warmest around noon and in almost a bell shaped pattern, which seems resonable when dealing with temperatures, it's cold during nighttime and warm during the day. Since the date i've chosen is christmas eve this year the kernel that takes in consideration of how long it was since the last observation isn't affecting the prediction so much, which is resonable since a observation six months ago alone doesn't say anything about the temperature six months in the future.
