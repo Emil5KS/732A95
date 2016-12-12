@@ -87,15 +87,15 @@ times <- c(paste0("0",seq(2,9,2),":00:00"),paste0(seq(10,24,2),":00:00"))
 
 
 
-as<-my_magic_kernel(data = st ,time = times, date = "2016-12-24",longlat = c(a,b), h_days = 7, h_time = 2, h_distance = 100000)
+as<-my_magic_kernel(data = st ,time = times, date = "2016-12-24", longlat = c(59.4446, 13.3374), h_days = 7, h_time = 2, h_distance = 100000)
 
 as[,1] <- as.factor(as[,1])
 as[,2] <- as.numeric(as[,2])
 ggplot(data = as, aes(x= time,y=temp))+geom_point() +
-  labs(x= "Time",y= "Temperature", title = "Temperature on christmas eve")
+  labs(x= "Time",y= "Temperature", title = "Temperature on christmas eve in Karlstad")
 ```
 
-The temperature seem to be at warmest around noon and in almost a bell shaped pattern, which seems resonable when dealing with temperatures, it's cold during nighttime and warm during the day. Since the date i've chosen is christmas eve this year the kernel that takes in consideration of how long it was since the last observation isn't affecting the prediction so much, which is resonable since a observation six months ago alone doesn't say anything about the temperature six months in the future.
+The temperature seem to be at warmest around noon and in almost a bell shaped pattern, which seems resonable when dealing with temperatures, it's cold during night time and warm during the day. Since the date I've chosen is christmas eve this year the kernel that takes in consideration of how long it was since the last observation isn't affecting the prediction so much, which is resonable since a observation six months ago alone doesn't say anything about the temperature six months in the future. In this case the kernels are indepentend wich renders the days kernel pretty bad since it won't give more importance to observations more close in time.
 
 In this scenario the time-component is probably the one affecting the prediction the most since it only cares about the time of the day and nothing elese. Here is a plot of the averages of the different time-periods.
 
@@ -110,7 +110,7 @@ The general shape of the means matches the pattern of the prediction very well. 
 
 The last kernel was the distance to the station the observation was recorded. This is also a pretty bad predictior, temperatures are a very regional occurences, the kernel smoother should be set to a low value, 100 000 is in this case a low value sincie it corresponds to 100 km which isn't that much considering the size of Sweden.  
 
-A more apropriate kernel to include would be one similar to the time-variable but in regards to the day of the year, but since this isn't SMHI and i don't have the time to do so i will consider this model very crude and shoudn't be used for predictions.
+A more apropriate kernel to include would be one similar to the time-variable but in regards to the day of the year it is, but since this isn't SMHI and I don't have the time to implement it I will consider this model very crude and shoudn't be used for predictions.
 
 
 

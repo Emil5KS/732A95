@@ -18,7 +18,7 @@
 #         | $$$$$$$$| $$  | $$| $$$$$$$/      |  $$$$$$/
 #         |________/|__/  |__/|_______/        \______/
 #
-# Fuck yeah
+# (Fuck yeah)
 
 
 
@@ -36,6 +36,15 @@ y <- as.factor(train$Conference)
 x <- t(train[-which(colnames(data) == "Conference")])
 
 TRAIN <- list(x = x, y = y,geneid = as.character( 1:nrow(x) ), genenames = rownames(x) ) 
+
+
+y1 <- as.factor(test$Conference)
+x1 <- t(test[-which(colnames(test) == "Conference")])
+
+TEST <- list(x = x1, y = y1,geneid = as.character( 1:nrow(x1) ), genenames = rownames(x1) ) 
+
+
+
 
 model <- pamr.train(TRAIN, threshold = seq(0,4, 0.1)) 
 
@@ -57,6 +66,7 @@ pamr.plotcen(modcv, TRAIN, threshold=0.9)
 crossed<-pamr.listgenes(modcv,TRAIN,threshold=1.2)
 cat( paste( colnames(data)[as.numeric(crossed[,1])], collapse='\n' ) )
 
+table(pamr.predict(modcv,TEST$x,threshold = 1.2),TEST$y)
 
 
 # 
@@ -85,13 +95,26 @@ cat( paste( colnames(data)[as.numeric(crossed[,1])], collapse='\n' ) )
 ## 1.2 
 
 
-library(glmnet)
+library(glmnet)  
+library(reshape2)   
 
 elasticNet<- cv.glmnet(x = as.matrix(train[,-which(colnames(train) == "Conference")]), y = train$Conference, 
-       family = "binomial", alpha = 0.5, lambda = seq(0.1,10,0.1))
+       family = "binomial", alpha = 0.5)    
   
-plot(elasticNet) 
-elsNet<- predict(elasticNet, newx = as.matrix(test[,-which(colnames(test) == "Conference")] ))
+plot(elasticNet)    
+ 
+mycoeffs <- coefficients(elasticNet)[-1,] 
+colnames(mycoeffs) <- elasticNet$lambda  
+
+myElnet<-melt(as.matrix(mycoeffs),id = rownames,c("lambda","coef")) 
+
+colnames(myElnet) <- c("features","lambda","coef") 
+
+ggplot(myElnet,aes(x=log(lambda),y = coef,color = features)) +
+  geom_line(show.legend = FALSE) + labs(x = expression(log(lambda)) )
+
+
+elsNet<- predict(elasticNet, s = elasticNet$lambda.min, newx = as.matrix(test[,-which(colnames(test) == "Conference")] )) 
 table(ifelse(elsNet > 0, 1,0),test$Conference)
 train[1,1:5]
 
@@ -104,3 +127,60 @@ barplot(res@eig)
 plot(res@rotated[,1], res@rotated[,2], xlab="PC1", ylab="PC2")
 
 predict(res,as.matrix(test[,-4703]))
+#Funkar inte.
+ksvm() # använd den här istället
+
+
+
+
+
+Conference.t.test<- as.numeric(as.character(data$Conference))
+
+data.t.test <- t(apply(data,1,FUN = function(x) as.numeric(as.character(x))))
+data.t.test <- as.data.frame(data.t.test)
+colnames(data.t.test) <- colnames(data)
+
+
+pvalues<-matrix(ncol = 2, nrow = ncol(data))
+for (i in 1:ncol(data)-1){ 
+  pvalues[i,]<- c(colnames(data.t.test)[i] ,
+                 t.test(data.t.test[,i]~Conference.t.test ,alternative = "two.sided" )$p.value) 
+}
+pvalues<-as.data.frame(pvalues)
+colnames(pvalues) <- c("feature","pvalue")
+pvalues$pvalue <- as.numeric(as.character(pvalues$pvalue))
+
+#Skit som inte funkar. 
+#apply(data.t.test[-ncol(data.t.test)],1,FUN = function(x) t.test(x ~ Conference.t.test)$p.value )
+
+
+#t.test(as.numeric(as.character(Conference)) ~ aalborg,data = data )
+
+# getAnywhere(p.adjust())
+# hochberg = {
+#   i <- lp:1L
+#   o <- order(p, decreasing = TRUE)
+#   ro <- order(o)
+#   pmin(1, cummin((n - i + 1L) * p[o]))[ro]
+# }
+
+# BH = {
+#   i <- lp:1L
+#   o <- order(p, decreasing = TRUE)
+#   ro <- order(o)
+#   pmin(1, cummin(n/i * p[o]))[ro]
+# }
+j <- 1:ncol(data)-1
+alph <- 0.25
+pvalues$feature <- as.factor(pvalues$feature)
+pvalues <- pvalues[order(pvalues$pvalue),]
+pvalues$reject <- 1:nrow(pvalues)
+for (i in 1:nrow(pvalues)){
+  pvalues$reject[i]<-(ifelse(alph*(i/nrow(pvalues)) > pvalues$pvalue[i] , 0,1))
+  
+}
+
+
+ggplot(data = pvalues[1:4702,], aes(x = 1:4702,y=pvalue, col = reject)) + geom_point()
+
+cummin(c(3:1, 2:0, 4:2))
