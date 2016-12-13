@@ -13,7 +13,7 @@
 #      |   | ___|   || |_____ |   _   |    |   | _____| |
 #      |___||_______||_______||__| |__|    |___||_______|
 #                                                        
-#                                                        
+#  V.2                                                      
 
 
 library(neuralnet)
@@ -24,15 +24,33 @@ trva <- data.frame(Var, Sin=sin(Var))
 
 tr <- trva[1:25,] # Training
 va <- trva[26:50,] # Validation
-neuralnet(Sin ~ Var,data = tr, hidden = 10, startweights = runif(nrow(tr)*10+10,-1,1) )
 
-# Random initializaiton of the weights in the interval [-1, 1]
-winit <- # Your code here
-  for(i in 1:10) {
-    nn <- neuralnet() # Your code here
-      # Your code here
-  }
-plot(nn <- neuralnet())# Your code here
-  # Plot of the predictions (black dots) and the data (red dots)
-  plot(prediction(nn)$rep1)
-  points(trva, col = "red")
+# # Random initializaiton of the weights in the interval [-1, 1]
+winit <- runif(31,-1,1)
+
+MSE.nn <-c()
+#MSE.nn.train <-c()
+for(i in 1:10) {
+  
+  nn<- neuralnet(Sin ~ Var,data = tr, hidden = 10, startweights = winit,
+                 threshold = i/1000)
+  
+  pr.nn <- compute(nn,va$Var)
+  pr.nn.tr <- compute(nn,tr$Var)
+  
+  # MSE.nn.train[i] <- sum((tr$Sin - pr.nn.tr$net.result)^2) / nrow(tr)
+  MSE.nn[i] <- sum((va$Sin - pr.nn$net.result)^2) /nrow(va)
+  
+  if (i > 1 && MSE.nn[i] > MSE.nn[i - 1]) break("Gradiant descent has decended")
+}
+
+
+nn <- neuralnet(Sin ~ Var,data = tr, hidden = 10, startweights = winit,
+                threshold = 4/1000)
+plot(nn)
+# Your code here
+# Plot of the predictions (black dots) and the data (red dots)
+x <- prediction(nn)$rep1[,1] 
+y<-prediction(nn)$rep1[,2]
+plot(x,y)
+points(trva, col = "red")
