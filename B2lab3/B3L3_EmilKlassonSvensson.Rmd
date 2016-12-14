@@ -1,0 +1,146 @@
+---
+title: "B3L3_EmilKlassonSvensson"
+author: "Emil K Svensson"
+date: "14 December 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Assignment 1 
+
+## 1. 
+
+```{r}
+library(pamr)
+
+data <- read.csv2("B2lab3/data.csv", encoding = "latin1")
+data <- data[sample(nrow(data)),]
+data$Conference <- as.factor(data$Conference)
+
+train  <- data[1:45, ]
+test   <- data[46:64, ]
+
+y <- as.factor(train$Conference)
+x <- t(train[-which(colnames(data) == "Conference")])
+
+TRAIN <- list(x = x, y = y,geneid = as.character( 1:nrow(x) ), genenames = rownames(x) ) 
+
+y1 <- as.factor(test$Conference)
+x1 <- t(test[-which(colnames(test) == "Conference")])
+
+TEST <- list(x = x1, y = y1,geneid = as.character( 1:nrow(x1) ), genenames = rownames(x1) ) 
+
+# Cross Validation for the shrunken centroid 
+cvmodel=pamr.cv(model,TRAIN)
+print(cvmodel) #13 1.2        314    4 ,  mao 314 variabler vill vi ha
+pamr.plotcv(cvmodel)
+
+```
+
+Something something is the best plot since it has the lowest error rate while having the lowest number of features.
+
+```{r}
+
+# Training a model with the best threshold from the cross validation 
+modcv <- pamr.train(TRAIN, threshold = 1.2) 
+
+pamr.plotcen(modcv, TRAIN, threshold=1.2)
+```
+
+Yeah...
+
+```{r}
+crossed<-pamr.listgenes(modcv,TRAIN,threshold=1.2)
+cat( paste( colnames(data)[as.numeric(crossed[,1])], collapse='\n' ) )[1:10]
+
+table(pamr.predict(modcv,TEST$x,threshold = 1.2),TEST$y)
+```
+
+Seems like a low error rate considering the number of observations the model used. 
+
+## 2. 
+
+### a)
+
+```{r}
+elasticNet<- cv.glmnet(x = as.matrix(train[,-which(colnames(train) == "Conference")]), y = train$Conference, 
+       family = "binomial", alpha = 0.5)    
+mycoeffs <- coefficients(elasticNet)[-1,] 
+cat(paste0(names(mycoeffs[mycoeffs != 0]),"\n")) 
+```
+These are the coefficients chosen by the elastic net.
+
+```{r}
+elsNet<- predict(elasticNet, s = elasticNet$lambda.min, newx = as.matrix(test[,-which(colnames(test) == "Conference")] )) 
+table(ifelse(elsNet > 0, 1,0),test$Conference)
+```
+
+The same missclassification rate as before but different missclassifications.
+
+### b) 
+
+```{r}
+
+
+filter <- ksvm(Conference~.,data=train,kernel="vanilladot")
+colnames(train)[filter@alphaindex[[1]]] # troligen fel 
+
+table(predict(filter,test[,-ncol(test)]),test$Conference) 
+```
+
+Same errors as in the elastic net. Different variables? 
+
+## 3
+
+```{r}
+
+#extracts the y-variable and remove the factors
+Conference.t.test<- as.numeric(as.character(data$Conference)) 
+
+#remove all factors and put them in a data.frame since the sapply transposes.
+data.t.test <- t(apply(data,1,FUN = function(x) as.numeric(as.character(x)))) 
+data.t.test <- as.data.frame(data.t.test) 
+colnames(data.t.test) <- colnames(data) 
+
+#calculates the t-test for all features vs Conference and extracts the p-value
+# and puts the feature name and its p-value in a matrix
+pvalues<-matrix(ncol = 2, nrow = (ncol(data)-1))
+for (i in 1:(ncol(data)-1) ){ 
+  pvalues[i,]<- c(colnames(data.t.test)[i] ,
+                 t.test(data.t.test[,i]~Conference.t.test ,alternative = "two.sided" )$p.value) 
+}
+
+#tidying the data up a bit and transforms it in to a data.frame 
+pvalues<-as.data.frame(pvalues)
+colnames(pvalues) <- c("feature","pvalue")
+pvalues$pvalue <- as.numeric(as.character(pvalues$pvalue))
+
+
+#setting a alpha
+alph <- 0.05
+pvalues <- pvalues[order(pvalues$pvalue),]
+pvalues$reject <- 1:nrow(pvalues)
+
+# for (i in 1:nrow(pvalues)){
+#   pvalues$reject[i]<-(ifelse(alph*(i/nrow(pvalues)) > pvalues$pvalue[i] , 0,1))
+#   
+# }
+pvalues$reject<-(ifelse(alph*(1:nrow(pvalues)/nrow(pvalues)) > pvalues$pvalue, 0,1))
+
+
+#Making a plot
+pvalues$feature <- as.factor(pvalues$feature)
+pvalues$reject <- as.factor(pvalues$reject)
+
+ggplot(data = pvalues[1:4702,], aes(x = 1:4702,y=pvalue, col = reject)) + geom_point() + labs(x="feature",y="p-value")
+
+paste("Number of features kept:",nrow(pvalues[pvalues$reject == 0,]),"\n The features kept were:")
+cat(paste0(pvalues$feature[pvalues$reject == 0],"\n")) 
+```
+
+# Assignment 2 
+
+
