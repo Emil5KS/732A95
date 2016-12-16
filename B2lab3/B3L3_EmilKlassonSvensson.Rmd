@@ -15,8 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(pamr)
-
-data <- read.csv2("B2lab3/data.csv", encoding = "latin1")
+set.seed(1234567890)
+data <- read.csv2("data.csv", encoding = "latin1")
 data <- data[sample(nrow(data)),]
 data$Conference <- as.factor(data$Conference)
 
@@ -34,6 +34,7 @@ x1 <- t(test[-which(colnames(test) == "Conference")])
 TEST <- list(x = x1, y = y1,geneid = as.character( 1:nrow(x1) ), genenames = rownames(x1) ) 
 
 # Cross Validation for the shrunken centroid 
+ model <- pamr.train(TRAIN, threshold = seq(0,4, 0.1)) 
 cvmodel=pamr.cv(model,TRAIN)
 print(cvmodel) #13 1.2        314    4 ,  mao 314 variabler vill vi ha
 pamr.plotcv(cvmodel)
