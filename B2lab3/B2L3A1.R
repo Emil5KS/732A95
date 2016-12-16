@@ -43,7 +43,7 @@ TEST <- list(x = x1, y = y1,geneid = as.character( 1:nrow(x1) ), genenames = row
 
 
 # 
-# model <- pamr.train(TRAIN, threshold = seq(0,4, 0.1)) 
+ model <- pamr.train(TRAIN, threshold = seq(0,4, 0.1)) 
 # 
 # pamr.plotcen(model, TRAIN, threshold=1)
 # pamr.plotcen(model, TRAIN, threshold=2.5)

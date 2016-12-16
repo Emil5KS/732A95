@@ -13,9 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 1. 
 
-```{r}
+```{r, message = FALSE}
 library(pamr)
-set.seed(1234567890)
+set.seed(12345)
 data <- read.csv2("data.csv", encoding = "latin1")
 data <- data[sample(nrow(data)),]
 data$Conference <- as.factor(data$Conference)
@@ -36,31 +36,47 @@ TEST <- list(x = x1, y = y1,geneid = as.character( 1:nrow(x1) ), genenames = row
 # Cross Validation for the shrunken centroid 
  model <- pamr.train(TRAIN, threshold = seq(0,4, 0.1)) 
 cvmodel=pamr.cv(model,TRAIN)
-print(cvmodel) #13 1.2        314    4 ,  mao 314 variabler vill vi ha
-pamr.plotcv(cvmodel)
+
 
 ```
 
 Something something is the best plot since it has the lowest error rate while having the lowest number of features.
 
 ```{r}
+print(cvmodel) #13 1.5       314    4 ,  mao 314 variabler vill vi ha
+```
+
+
+```{r,fig.width = 10, fig.height = 10}
+pamr.plotcv(cvmodel)
+
+```
+
+
+```{r, fig.width = 10, fig.height = 10}
 
 # Training a model with the best threshold from the cross validation 
-modcv <- pamr.train(TRAIN, threshold = 1.2) 
+modcv <- pamr.train(TRAIN, threshold = 2.6) 
 
-pamr.plotcen(modcv, TRAIN, threshold=1.2)
+pamr.plotcen(modcv, TRAIN, threshold = 2.6)
 ```
 
-Yeah...
+The length of the bars represent the weights for the predictions. So for predicting a 1 i.e. a mail regarding conferences large positive weights are given to words as papers, submissions and important. A large negative weight is given to the word position when trying to predict a mail.
 
+```{r,message = FALSE}
+crossed<-pamr.listgenes(modcv,TRAIN,threshold=2.6)
+```
 ```{r}
-crossed<-pamr.listgenes(modcv,TRAIN,threshold=1.2)
 cat( paste( colnames(data)[as.numeric(crossed[,1])], collapse='\n' ) )[1:10]
 
-table(pamr.predict(modcv,TEST$x,threshold = 1.2),TEST$y)
+```
+These are the variables chosen by the model. Submission, papers, conference and publish are among these variables, seems like resonable words in a email from a conference. 
+
+```{r}
+table(pamr.predict(modcv,TEST$x,threshold = 2.6),TEST$y)
 ```
 
-Seems like a low error rate considering the number of observations the model used. 
+Seems like a low error rate ca 10 % considering the number of observations the model used. 
 
 ## 2. 
 
@@ -72,27 +88,30 @@ elasticNet<- cv.glmnet(x = as.matrix(train[,-which(colnames(train) == "Conferenc
 mycoeffs <- coefficients(elasticNet)[-1,] 
 cat(paste0(names(mycoeffs[mycoeffs != 0]),"\n")) 
 ```
-These are the coefficients chosen by the elastic net.
+These are the coefficients chosen by the elastic net, similar to the previous model but fewer number of variables. Submission, position and papers are still here for example.
+
+```{r}
+cat(elasticNet$name)
+```
+This is the penalty factor that the cross validation chooses.
 
 ```{r}
 elsNet<- predict(elasticNet, s = elasticNet$lambda.min, newx = as.matrix(test[,-which(colnames(test) == "Conference")] )) 
 table(ifelse(elsNet > 0, 1,0),test$Conference)
 ```
 
-The same missclassification rate as before but different missclassifications.
+One observation more is missclassified here.
+
 
 ### b) 
 
-```{r}
-
-
+```{r,message = FALSE,error=FALSE}
+library(kernlab)
 filter <- ksvm(Conference~.,data=train,kernel="vanilladot")
-colnames(train)[filter@alphaindex[[1]]] # troligen fel 
-
-table(predict(filter,test[,-ncol(test)]),test$Conference) 
+table(     predict(filter,test[,-ncol(test)])   ,test$Conference) 
 ```
 
-Same errors as in the elastic net. Different variables? 
+1/19 as missclassification error is the best result so far. The number of support vectors choosen were 44, but the number of features are 4702, since svm only uses the most important vectors it uses all features avaliable in the model.
 
 ## 3
 
@@ -138,10 +157,113 @@ pvalues$reject <- as.factor(pvalues$reject)
 
 ggplot(data = pvalues[1:4702,], aes(x = 1:4702,y=pvalue, col = reject)) + geom_point() + labs(x="feature",y="p-value")
 
-paste("Number of features kept:",nrow(pvalues[pvalues$reject == 0,]),"\n The features kept were:")
+cat(paste("Number of features kept:",nrow(pvalues[pvalues$reject == 0,]),"\n The features kept were:"))
 cat(paste0(pvalues$feature[pvalues$reject == 0],"\n")) 
 ```
 
 # Assignment 2 
 
+```{r}
+set.seed(1234567890)
+spam <- read.csv2("B2lab3/spambase.csv") 
+ind <- sample(1:nrow(spam))
+spam <- spam[ind,c(1:48,58)]
+h <- 1
+betai <- -0.5  # Your value here
+  Mi <- 20 # Your value here
+  N <- 500 # number of training points
 
+  if(all(levels(factor(spam$Spam)) == c(-1,1)) | all(levels(factor(spam$Spam)) == c(1,-1)) ){
+    
+  }else{
+    spam$Spam[spam$Spam == 0] <- (-1) 
+  }
+  
+gaussian_k <- function(x, h = 1) { # Gaussian kernel 
+  return(exp(-(x^2/2*h^2))) 
+} 
+
+
+#a_n = C- m_n
+
+
+
+SVM <- function(sv,i,M = Mi, beta = betai){  
+
+
+
+  
+   step4 <- function(dataindex){
+      
+     b<-0
+     distelement<-as.matrix(dist(rbind(dataindex,spam[sv,-ncol(spam)])))[-1,1]
+     
+     return(sum(spam[sv,"Spam"]* gaussian_k(distelement)) + b )
+   }
+  
+   step8 <- function(SV){
+     yxm <- c()
+     res<-c()
+     for (m in SV) {
+       distelement <- as.matrix(dist(rbind(spam[m,-ncol(spam)],spam[m,-ncol(spam)]))) 
+       yxm <-  sum(spam[m,"Spam"]* gaussian_k(distelement[-1,1]))
+       res <-  c(res,spam[m,"Spam"]*(step4(dataindex = spam[m,-ncol(spam)]) - yxm))
+     } 
+     return(which.max(res))
+   }  
+  
+  b <- 0
+  errors <- 1
+  errorrate <- vector(length = N)
+  errorrate[1] <- 1
+  sv <- c(1)
+  s4<-c()
+  
+  for(i in 2:N) {
+
+    s4<-step4(dataindex = spam[i,-ncol(spam)])
+    
+    if(spam[i,"Spam"]*s4 < 0){
+      errors <- errors + 1
+    }
+    
+    if(spam[i,"Spam"]*s4 < beta){
+      sv[length(sv)+1] <- i 
+    }
+    
+    if (length(sv) > M  ){
+        sv <- sv[-step8(SV = sv)]
+      }
+    errorrate[i] <- errors / i 
+    }
+  #plot(errorrate)
+  length(sv)
+  errorrate[N]
+  return(errorrate)
+
+  
+}
+
+
+#system.time()
+
+  system.time(svm1<-SVM(M = 500, beta = 0))
+svm2<-SVM(M = 500, beta = -0.05)
+svm3<-SVM(M = 20, beta = 0)
+svm4<-SVM(M = 20, beta = -0.05)
+erry<-melt(data.frame(svm1=svm1,svm2=svm2,svm3=svm3,svm4=svm4))
+erry$index <- rep(1:length(svm1),4)
+ggplot(data = erry, aes(x=index, y = value, color = variable)) + geom_line() + 
+  labs(x="Index",y = "Errorrate") + scale_color_manual(
+    labels=c("M = 500, beta = 0","M = 500, beta = -0.5",
+             "M = 20, beta = 0","M = 20, beta = -0.5"),
+              values = c("blue", "red","green","orange"))
+
+
+
+
+```
+
+The M = 500 with beta = 0 is better than the one with -0.5 since we don't accept any errors with beta = 0. But since we don't pass the max number of support vectors and have to replace them it only will increase the n.o. errors.
+
+The M = 20 with beta = 0 is the slowest since it takes in and evaluates the support vectors and their contributions the most times since it is set to don't accept any errors, compared to the M = 20 and beta = -.5 that accepts some errors and dont have to evaluate that many support vectors contribution and instead accepts some errors. This seems to be a better approach since the M = 20 beta = 0 doesn't add worse support vectors as the one with beta = -0.5 does.

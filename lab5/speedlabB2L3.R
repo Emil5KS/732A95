@@ -44,3 +44,27 @@ step4speed <- function(dataindex){
   }
   return(sum(yxi))
 }
+
+
+
+# 
+# step4 <- function(dataindex){
+#   # yxi <- c()
+#   b<-0
+#   # distelement <-apply(spam[sv,-ncol(spam)],MARGIN = 1, FUN = function(m){
+#   #   as.matrix(dist(rbind(dataindex,m)))[-1,1]
+#   # })  
+#   distelement<-as.matrix(dist(rbind(dataindex,spam[sv,-ncol(spam)])))[-1,1]
+#   #i<-1
+#   # for (m in sv){
+#   #  #distelement <- as.matrix(dist(rbind(dataindex,spam[m,-ncol(spam)])))
+#   # yxi<-  c(yxi,
+#   # #sum(1*spam[sv,"Spam"]* gaussian_k(dist(spam[i,],spam[sv,]))) + b
+#   #  i<- i + 1
+#   #  
+#   #  
+#   # } 
+#   return(sum(spam[sv,"Spam"]* gaussian_k(distelement)) + b )
+#   #return(sum(yxi))
+# }
+

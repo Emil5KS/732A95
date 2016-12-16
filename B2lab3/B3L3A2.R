@@ -28,23 +28,11 @@ SVM <- function(sv,i,M = Mi, beta = betai){
 
   
    step4 <- function(dataindex){
-      # yxi <- c()
-      b<-0
-      # distelement <-apply(spam[sv,-ncol(spam)],MARGIN = 1, FUN = function(m){
-      #   as.matrix(dist(rbind(dataindex,m)))[-1,1]
-      # })  
+      
+     b<-0
      distelement<-as.matrix(dist(rbind(dataindex,spam[sv,-ncol(spam)])))[-1,1]
-    #i<-1
-      # for (m in sv){
-      #  #distelement <- as.matrix(dist(rbind(dataindex,spam[m,-ncol(spam)])))
-      # yxi<-  c(yxi,
-      # #sum(1*spam[sv,"Spam"]* gaussian_k(dist(spam[i,],spam[sv,]))) + b
-      #  i<- i + 1
-      #  
-      #  
-      # } 
+     
      return(sum(spam[sv,"Spam"]* gaussian_k(distelement)) + b )
-      #return(sum(yxi))
    }
   
    step8 <- function(SV){
@@ -57,20 +45,12 @@ SVM <- function(sv,i,M = Mi, beta = betai){
      } 
      return(which.max(res))
    }  
-   
-  
-  # as.matrix(dist(rbind(spam[1,-ncol(spam)],spam[1,-ncol(spam)])))
-
- 
-  
   
   b <- 0
   errors <- 1
   errorrate <- vector(length = N)
   errorrate[1] <- 1
   sv <- c(1)
-  
-  
   s4<-c()
   
   for(i in 2:N) {
@@ -97,10 +77,6 @@ SVM <- function(sv,i,M = Mi, beta = betai){
 
   
 }
-  #plot(errorrate[seq(from=1, to=N, by=10)], ylim=c(0.2,0.4), type="o") 
-
-#}   
-
 
 
 #system.time()
@@ -109,16 +85,16 @@ SVM <- function(sv,i,M = Mi, beta = betai){
 svm2<-SVM(M = 500, beta = -0.05)
 svm3<-SVM(M = 20, beta = 0)
 svm4<-SVM(M = 20, beta = -0.05)
+erry<-melt(data.frame(svm1=svm1,svm2=svm2,svm3=svm3,svm4=svm4))
+erry$index <- rep(1:length(svm1),4)
+ggplot(data = erry, aes(x=index, y = value, color = variable)) + geom_line() + 
+  labs(y = "Errorrate") + scale_color_manual(labels=c("M = 500, beta = 0","M = 500, beta = -0.5",
+                                                      "M = 500, beta = 0","M = 500, beta = -0.5"),values = c("blue", "red","green","orange"))
 
 
+      
 #Vet du vad en gotländsk statistiker säger när han är dålig i magen? 
 #Jag har gauss i magen.
   
 
 
-distelement <-apply(spam[1:500,-ncol(spam)],MARGIN = 1, FUN = function(m){
-  as.matrix(dist(rbind(spam[1,-ncol(spam)],m)))
-})
-as.matrix(dist(rbind(spam[1,-ncol(spam)],spam[6,-ncol(spam)])),nrow = 2,ncol =2)
-
-distelement[2,]
