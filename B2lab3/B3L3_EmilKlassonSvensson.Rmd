@@ -1,8 +1,8 @@
 ---
-title: "B3L3_EmilKlassonSvensson"
+title: "Computer lab 3 Block 2"
 author: "Emil K Svensson"
-date: "14 December 2016"
-output: html_document
+date: "17 December 2016"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -15,6 +15,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, message = FALSE}
 library(pamr)
+library(glmnet)
+library(ggplot2)
+library(reshape2)
 set.seed(12345)
 data <- read.csv2("data.csv", encoding = "latin1")
 data <- data[sample(nrow(data)),]
@@ -165,7 +168,7 @@ cat(paste0(pvalues$feature[pvalues$reject == 0],"\n"))
 
 ```{r}
 set.seed(1234567890)
-spam <- read.csv2("B2lab3/spambase.csv") 
+spam <- read.csv2("spambase.csv") 
 ind <- sample(1:nrow(spam))
 spam <- spam[ind,c(1:48,58)]
 h <- 1
@@ -264,6 +267,6 @@ ggplot(data = erry, aes(x=index, y = value, color = variable)) + geom_line() +
 
 ```
 
-The M = 500 with beta = 0 is better than the one with -0.5 since we don't accept any errors with beta = 0. But since we don't pass the max number of support vectors and have to replace them it only will increase the n.o. errors.
+The M = 500 with beta = 0 is better than the one with -0.5 since we don't accept any errors with beta = 0. But since we don't pass the max number of support vectors and have to replace them it only will accept more errors and not improve the model..
 
-The M = 20 with beta = 0 is the slowest since it takes in and evaluates the support vectors and their contributions the most times since it is set to don't accept any errors, compared to the M = 20 and beta = -.5 that accepts some errors and dont have to evaluate that many support vectors contribution and instead accepts some errors. This seems to be a better approach since the M = 20 beta = 0 doesn't add worse support vectors as the one with beta = -0.5 does.
+The M = 20 with beta = 0 is the slowest since it takes in and evaluates the support vectors and their contributions the most times since it is set to don't accept any errors. This compared to the M = 20, beta = -0.5 that accepts some errors and dont have to evaluate that many support vectors contribution and instead accepts some errors. This seems to be a better approach this time since the M = 20, beta = 0 doesn't add worse support vectors as the one with beta = -0.5 does.

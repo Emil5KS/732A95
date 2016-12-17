@@ -1,8 +1,8 @@
 ---
 title: "lab6_EmilKlassonSvensson"
 author: "Emil K Svensson"
-date: "13 December 2016"
-output: html_document
+date: "17 December 2016"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
