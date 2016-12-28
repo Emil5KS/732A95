@@ -7,9 +7,9 @@
 ## 1. Import and divide data
 
 
-setwd("Documents/732A95/lab1")
 
-data <- read.csv2("spambase.csv",sep = ",", header = TRUE, stringsAsFactors = FALSE) # Reading data 
+
+data <- read.csv2("lab1/spambase.csv",sep = ",", header = TRUE, stringsAsFactors = FALSE) # Reading data 
 
 set.seed(12345)
 
@@ -45,12 +45,17 @@ D <- 1 - C
 
 ### Hit är allt glaskrat. 
 
+#Returns orders for each column (the lowest value is the fist value)
+myOrders <- apply(D,MARGIN = 2, FUN = order) 
 
-myOrders <- apply(D,MARGIN = 2, FUN = order) #Returns orders for each column (the lowest value is the fist value)
+#Keeps the K lowest values in the distance matrix
+myOrders <- matrix(myOrders[1:K,], nrow=K) 
 
-myOrders <- matrix(myOrders[1:K,], nrow=K)  #Keeps the K lowest values in the distance matrix
-myData<-train[myOrders[1:K,],length(train)]  #Extracts the K number of values of the observed y-variables
-myData<- matrix(myData,nrow=K,byrow = FALSE)  #puts the y-observations in a matrix where each column represents a column
+#Extracts the K number of values of the observed y-variables
+myData<-train[myOrders[1:K,],length(train)] 
+
+#puts the y-observations in a matrix where each column represents a column
+myData<- matrix(myData,nrow=K,byrow = FALSE)  
 
 myClass<-apply(myData,MARGIN = 2, FUN =function(X) round(mean(X)))  #Majority voting 
 myPredict<-apply(myData,MARGIN = 2, FUN =function(X) mean(X))  #Generating predictions for 1.6 

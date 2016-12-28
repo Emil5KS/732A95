@@ -11,9 +11,9 @@ library(geosphere)
 stations <- read.csv("lab5/stations.csv",header = TRUE)
 temps <- read.csv("lab5/temps50k.csv")
 st <- merge(stations,temps,by="station_number")
+write.csv(st,"st1.csv")
 
-
-
+# (u'52230', (u'55,3836', u'12,8203', u'"2004-05-28"', u'"12:00:00"', u'12'))
 h_distance <- # These three values are up to the students
   h_date <-
   h_time <-
