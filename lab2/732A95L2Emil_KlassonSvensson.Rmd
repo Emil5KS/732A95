@@ -2,7 +2,7 @@
 title: "Computer lab 2"
 author: "Emil K Svensson"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: pdf_document
+output: word_document
 toc: true
 toc_depth: 2
 ---
@@ -187,7 +187,7 @@ The best subset to predict Fertility is Agriculture, Education, Catholic and Inf
 ```{r}
 ## 2.1
 
-setwd("/Users/EmilsHem/Documents/732A95/lab2")
+#setwd("/Users/EmilsHem/Documents/732A95/lab2")
 TC<- read.csv2("tecator.csv")
 
 ggplot(data = TC, aes(x=Protein,Moisture)) + geom_point()

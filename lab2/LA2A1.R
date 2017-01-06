@@ -147,6 +147,8 @@ plot(engr)
 
 myLM(Y=swiss[,1],X=swiss[,2:ncol(swiss)],Nfolds=5)
 
+lm
+
 
 
 
