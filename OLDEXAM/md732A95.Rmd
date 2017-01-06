@@ -113,4 +113,44 @@ The PLSR have a lower test-error and therefor have a better predictive power. Be
 # Assignment 2 
 
 
+```{r}
+scars <- mtcars
+scars$hp <- scale(scars$hp)
+scars$qsec <- scale(scars$qsec)
+
+ggplot(data = scars, aes(x=qsec,y=hp, color = am) ) + geom_point()
+
+```
+
+Not perfectly, not linear.
+
+
+# Equal priors 
+
+```{r}
+library(MASS)
+equalpriors<-lda(am~ hp + qsec,data = scars, prior = c(1,1)/2 )
+
+scars$eqprior<-ifelse(predict(equalpriors,type = "class")$x > 0,0,1)
+ggplot(data = scars, aes(x=qsec,y=hp, color = eqprior) ) + geom_point()
+equalpriors
+```
+
+# Prop priors
+
+
+
+
+```{r}
+
+
+proppriors<-lda(am~ hp + qsec,data = scars, prior = c(19,13)/nrow(scars) )
+
+scars$pp<-ifelse(predict(proppriors,type = "class")$x > 0,0,1)
+ggplot(data = scars, aes(x=qsec,y=hp, color = pp) ) + geom_point()
+
+proppriors
+
+```
+
 
