@@ -73,7 +73,7 @@ The chosen variables are K and Ca, im to bad at chemistry to remember what they 
 
 ### a)
 ```{r}
-summary(myplsr)
+#summary(myplsr)
 ```
 
 One would need 3 components to explain over 90 % of the variation in the feature-space
@@ -82,7 +82,7 @@ One would need 3 components to explain over 90 % of the variation in the feature
 ### c) 
 
 ```{r}
-myplsr$validation$PRESS
+#myplsr$validation$PRESS
 ```
 
 All 7 components are needed according to the PRESS since 7 comps has the lowest value.
@@ -91,12 +91,12 @@ All 7 components are needed according to the PRESS since 7 comps has the lowest 
 
 ### e)
 ```{r}
-myplsr$coefficients
+#myplsr$coefficients
 ```
 
 ### f)
 ```{r}
-mean((test$Al - predict(myplsr, newdata = test))^2)
+#mean((test$Al - predict(myplsr, newdata = test))^2)
 ```
 
 
