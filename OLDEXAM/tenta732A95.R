@@ -64,7 +64,7 @@ mean((test$Al - predict(myplsr, newdata = test))^2)
 # Assignment 2 
 scars <- mtcars
 scars$hp <- scale(scars$hp)
-scars$hp <- scale(scars$qsec)
+scars$qsec <- scale(scars$qsec)
 
 ggplot(data = scars, aes(x=qsec,y=hp, color = am) ) + geom_point()
 
